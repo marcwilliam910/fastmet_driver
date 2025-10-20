@@ -71,7 +71,7 @@ export default function TabLayout() {
           tabBarIcon: ({color, focused}) => (
             <View>
               <Ionicons
-                name={focused ? "calendar-clear" : "calendar-clear-outline"}
+                name={focused ? "car" : "car-outline"}
                 size={24}
                 color={color}
               />
