@@ -10,10 +10,7 @@ import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 const CustomDrawerContent = (props: any) => {
   const inset = useSafeAreaInsets();
-  const isAuthenticated = !!props.user;
-  const action = isAuthenticated
-    ? () => props.setIsOpen(true)
-    : () => props.navigation.navigate("(auth)");
+
   return (
     <View className="flex-1">
       <DrawerContentScrollView {...props}>
@@ -22,14 +19,8 @@ const CustomDrawerContent = (props: any) => {
           className="flex-row items-center gap-3 px-5 py-4"
           // onPress={action}
         >
-          <Ionicons
-            name={isAuthenticated ? "log-out-outline" : "log-in-outline"}
-            size={24}
-            color="white"
-          />
-          <Text className="font-semibold text-white">
-            {isAuthenticated ? "Logout" : "Register / Login"}
-          </Text>
+          <Ionicons name={"log-out-outline"} size={24} color="white" />
+          <Text className="font-semibold text-white">{"Logout"}</Text>
         </Pressable>
       </DrawerContentScrollView>
 
@@ -135,8 +126,8 @@ export default function DrawerLayout() {
         <Drawer.Screen
           name="switch"
           options={{
-            drawerLabel: "Switch Driver",
-            title: "Switch Driver",
+            drawerLabel: "Switch Rider",
+            title: "Switch Rider",
             headerShown: true,
             drawerIcon: ({focused}) => (
               <Ionicons

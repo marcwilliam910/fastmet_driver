@@ -152,7 +152,7 @@ const Register = () => {
               Already have an account?
             </Text>
             <Text className="font-semibold underline text-lightPrimary">
-              Login
+              Sign in
             </Text>
           </Pressable>
         </View>
