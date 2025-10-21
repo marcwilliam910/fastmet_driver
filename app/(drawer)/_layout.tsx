@@ -83,7 +83,7 @@ export default function DrawerLayout() {
           options={{
             drawerLabel: "My Profile",
             title: "My Profile",
-            headerShown: true,
+            // headerShown: true,
             drawerIcon: ({focused}) => (
               <Ionicons
                 name={focused ? "person" : "person-outline"}
