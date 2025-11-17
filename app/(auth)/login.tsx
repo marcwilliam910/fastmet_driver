@@ -1,10 +1,10 @@
 import CustomKeyAvoidingView from "@/components/CustomKeyAvoid";
 import LogoWithText from "@/components/LogoWithText";
-import {Ionicons} from "@expo/vector-icons";
-import {router} from "expo-router";
-import React, {useRef, useState} from "react";
-import {Pressable, Text, TextInput, View} from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import React, { useRef, useState } from "react";
+import { Pressable, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Login = () => {
   const [form, setForm] = useState({
@@ -28,7 +28,7 @@ const Login = () => {
             <Text className="text-sm font-medium text-gray-700 ">Email</Text>
             <TextInput
               value={form.email}
-              onChangeText={(text) => setForm({...form, email: text})}
+              onChangeText={(text) => setForm({ ...form, email: text })}
               autoCapitalize="none"
               placeholder="Email"
               keyboardType="email-address"
@@ -51,7 +51,7 @@ const Login = () => {
             <View className="relative">
               <TextInput
                 value={form.password}
-                onChangeText={(text) => setForm({...form, password: text})}
+                onChangeText={(text) => setForm({ ...form, password: text })}
                 autoCapitalize="none"
                 ref={passwordRef}
                 placeholder="Password"
@@ -81,7 +81,7 @@ const Login = () => {
 
           {/* Forgot Password */}
           <Pressable className="self-end">
-            {({pressed}) => (
+            {({ pressed }) => (
               <Text
                 className={`text-sm font-semibold text-gray-600 ${pressed ? "underline" : ""}`}
               >
@@ -101,7 +101,7 @@ const Login = () => {
             className="flex-row items-center justify-center gap-1 py-4"
           >
             <Text className="font-semibold text-gray-600">
-              Don't have an account?
+              Don&apos;t have an account?
             </Text>
             <Text className="font-semibold underline text-lightPrimary">
               Register
