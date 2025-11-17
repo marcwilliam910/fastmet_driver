@@ -1,7 +1,8 @@
-import {Ionicons} from "@expo/vector-icons";
-import {Image} from "expo-image";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { router } from "expo-router";
 import React from "react";
-import {FlatList, Pressable, Text, TextInput, View} from "react-native";
+import { FlatList, Pressable, Text, TextInput, View } from "react-native";
 
 const DUMMYMESSAGES = [
   {
@@ -90,9 +91,9 @@ const Chats = () => {
         <FlatList
           data={DUMMYMESSAGES}
           showsVerticalScrollIndicator={false}
-          renderItem={({item}) => <MessageCard item={item} />}
+          renderItem={({ item }) => <MessageCard item={item} />}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{gap: 3, paddingBottom: 60}}
+          contentContainerStyle={{ gap: 3, paddingBottom: 60 }}
         />
       </View>
     </View>
@@ -101,15 +102,15 @@ const Chats = () => {
 
 export default Chats;
 
-const MessageCard = ({item}: any) => {
+const MessageCard = ({ item }: any) => {
   return (
     <Pressable
       className="flex-row items-center gap-4 px-4 py-2 active:bg-ctaSecondary"
-      // onPress={() => router.push("/(root_screens)/message")}
+      onPress={() => router.push("/(root_screen)/message")}
     >
       <Image
         source={item.image}
-        style={{width: 50, height: 50, borderRadius: 999}}
+        style={{ width: 50, height: 50, borderRadius: 999 }}
         contentFit="contain"
       />
       <View className="flex-1 gap-1">

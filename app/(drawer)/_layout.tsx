@@ -4,6 +4,7 @@ import {
   DrawerContentScrollView,
   DrawerItemList,
 } from "@react-navigation/drawer";
+import {Image} from "expo-image";
 import {Drawer} from "expo-router/drawer";
 import {Pressable, Text, View} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
@@ -14,6 +15,16 @@ const CustomDrawerContent = (props: any) => {
   return (
     <View className="flex-1">
       <DrawerContentScrollView {...props}>
+        <View className="flex-row items-center justify-center w-full gap-1 pr-5 mb-2">
+          <Image
+            source={require("@/assets/fastmet/logo.png")}
+            style={{width: 40, height: 60}}
+            contentFit="contain"
+          />
+          <Text className="text-lg font-bold tracking-widest text-white">
+            FastMet
+          </Text>
+        </View>
         <DrawerItemList {...props} />
         <Pressable
           className="flex-row items-center gap-3 px-5 py-4"
@@ -83,7 +94,7 @@ export default function DrawerLayout() {
           options={{
             drawerLabel: "My Profile",
             title: "My Profile",
-            headerShown: true,
+            // headerShown: true,
             drawerIcon: ({focused}) => (
               <Ionicons
                 name={focused ? "person" : "person-outline"}
