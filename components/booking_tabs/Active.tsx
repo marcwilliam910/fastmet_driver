@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
-import { DUMMY, serviceAddons } from "../request_tabs/Regular";
+import { DUMMY } from "../request_tabs/Regular";
 
 export default function Active() {
   return (
@@ -14,9 +15,8 @@ export default function Active() {
           distance={item.distance}
           amount={item.amount}
           isCash={item.isCash}
-          services={item.selectedServices}
           bookingType={item.bookingType}
-          onPressSeeMore={() => {}}
+          onPress={() => router.push("/(root_screen)/booking/pickup")}
         />
       )}
       keyExtractor={(item) => item.id}
@@ -34,12 +34,11 @@ export default function Active() {
 type CardProps = {
   pickup: string;
   dropoff: string;
-  distance: string;
+  distance: number;
   amount: number;
   isCash: boolean;
-  services: typeof serviceAddons;
   bookingType: string;
-  onPressSeeMore: () => void;
+  onPress: () => void;
 };
 
 const Card = ({
@@ -49,12 +48,11 @@ const Card = ({
   isCash,
   amount,
   bookingType,
-  services,
-  onPressSeeMore,
+  onPress,
 }: CardProps) => {
   return (
     <Pressable
-      onPress={onPressSeeMore}
+      onPress={onPress}
       className="overflow-hidden bg-white rounded-2xl active:opacity-80"
       style={{
         shadowColor: "#000",
@@ -93,7 +91,7 @@ const Card = ({
               {dropoff}
             </Text>
           </View>
-          <Text className="font-bold">{distance}</Text>
+          <Text className="font-bold">{distance}km</Text>
 
           <Ionicons
             name="location-sharp"
@@ -119,9 +117,9 @@ const Card = ({
 
         <Pressable
           className="items-center justify-center active:scale-105"
-          onPress={onPressSeeMore}
+          onPress={onPress}
         >
-          <Text className="text-sm font-medium">+ See more</Text>
+          <Text className="text-sm font-medium">View on Map</Text>
         </Pressable>
       </View>
     </Pressable>

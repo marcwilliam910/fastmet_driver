@@ -60,6 +60,13 @@ export default function RootScreenLayout() {
           headerShown: false,
         }}
       /> */}
+      <Stack.Screen
+        name="booking"
+        options={{
+          title: "Booking",
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

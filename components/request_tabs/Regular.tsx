@@ -26,7 +26,7 @@ export const DUMMY = [
     pickup: "1234 Long Address St. Brgy. Name, City Name, Province Name, 1234",
     dropoff:
       "5678 Another Long Address Ave. Brgy. Different, City Name, Province Name, 5678",
-    distance: "12 km",
+    distance: 12,
     amount: 1500,
     isCash: true,
     selectedServices: serviceAddons,
@@ -164,7 +164,7 @@ export default function Regular() {
 type CardProps = {
   pickup: string;
   dropoff: string;
-  distance: string;
+  distance: number;
   amount: number;
   isCash: boolean;
   services: typeof serviceAddons;
@@ -223,7 +223,7 @@ const Card = ({
               {dropoff}
             </Text>
           </View>
-          <Text className="font-bold">{distance}</Text>
+          <Text className="font-bold">{distance}km</Text>
 
           <Ionicons
             name="location-sharp"

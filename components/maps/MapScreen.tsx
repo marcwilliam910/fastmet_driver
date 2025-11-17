@@ -1,0 +1,135 @@
+import { GOOGLE_MAPS_API_KEY, STATIC_IMAGES } from "@/utils/constants";
+import * as Location from "expo-location";
+import { router } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
+import { Alert, StyleSheet, View } from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import MapViewDirections from "react-native-maps-directions";
+
+type Region = {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+};
+
+const pickUp = {
+  coords: {
+    lat: 14.5995, // Manila
+    lng: 120.9842,
+  },
+};
+
+const dropOff = {
+  coords: {
+    lat: 14.5764, // Pasig
+    lng: 121.0851,
+  },
+};
+
+export default function MapScreen() {
+  const mapRef = useRef<MapView>(null);
+
+  const [region, setRegion] = useState<Region | null>(null);
+
+  useEffect(() => {
+    if (!GOOGLE_MAPS_API_KEY) router.back();
+
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Required",
+          "Location permission is needed to show your position."
+        );
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({});
+      const userRegion = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      };
+      setRegion(userRegion);
+      mapRef.current?.animateToRegion(userRegion, 1000);
+    })();
+  }, []);
+
+  return (
+    <View className="flex-1">
+      {region && (
+        <MapView
+          ref={mapRef}
+          style={StyleSheet.absoluteFillObject}
+          showsUserLocation
+          followsUserLocation
+          showsCompass
+          mapType="standard"
+          initialRegion={region}
+        >
+          {pickUp && (
+            <Marker
+              coordinate={{
+                latitude: pickUp.coords.lat,
+                longitude: pickUp.coords.lng,
+              }}
+              title="Pick Up"
+              image={STATIC_IMAGES.pickup}
+            />
+          )}
+
+          {dropOff && (
+            <Marker
+              coordinate={{
+                latitude: dropOff.coords.lat,
+                longitude: dropOff.coords.lng,
+              }}
+              title="Drop Off"
+              image={STATIC_IMAGES.dropoff}
+            />
+          )}
+
+          {pickUp && dropOff && (
+            <MapViewDirections
+              origin={{
+                latitude: pickUp.coords.lat,
+                longitude: pickUp.coords.lng,
+              }}
+              destination={{
+                latitude: dropOff.coords.lat,
+                longitude: dropOff.coords.lng,
+              }}
+              apikey={GOOGLE_MAPS_API_KEY ?? ""}
+              strokeWidth={5}
+              strokeColor="#007AFF"
+              optimizeWaypoints
+              onReady={(result) => {
+                mapRef.current?.fitToCoordinates(result.coordinates, {
+                  edgePadding: { top: 80, right: 80, bottom: 80, left: 80 },
+                  animated: true,
+                });
+              }}
+            />
+          )}
+        </MapView>
+      )}
+
+      {/* Floating burger */}
+      {/* <Pressable
+        onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+        className="absolute top-4 left-4 bg-white p-2 rounded-full shadow-lg"
+        style={{
+          shadowColor: "#000",
+          shadowOffset: { width: 2, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+          elevation: 5,
+        }}
+      >
+        <Ionicons name="menu" size={28} color="#FFA840" />
+      </Pressable> */}
+    </View>
+  );
+}
