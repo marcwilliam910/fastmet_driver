@@ -1,23 +1,23 @@
-import {Ionicons} from "@expo/vector-icons";
-import React, {useState} from "react";
-import {FlatList, Pressable, Text, View} from "react-native";
-import Popover, {PopoverPlacement} from "react-native-popover-view";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useState } from "react";
+import { FlatList, Pressable, Text, View } from "react-native";
+import Popover, { PopoverPlacement } from "react-native-popover-view";
 import SeeMoreModal from "../modals/seeMoreModal";
 
 export const serviceAddons = [
-  {id: "3", name: "Small Truck", price: 100, icon: "🚚"},
-  {id: "4", name: "Safety Shoes", price: 100, icon: "👞"},
+  { id: "3", name: "Small Truck", price: 100, icon: "🚚" },
+  { id: "4", name: "Safety Shoes", price: 100, icon: "👞" },
   {
     id: "5",
     name: "1 Extra Helper",
     price: 100,
     icon: "🧑",
   },
-  {id: "6", name: "Reflector Vest", price: 50, icon: "🦺"},
-  {id: "7", name: "Extra Space", price: 60, icon: "📦"},
-  {id: "8", name: "Fire Extinguisher", price: 30, icon: "🧯"},
-  {id: "9", name: "Document Print", price: 100, icon: "📄"},
-  {id: "10", name: "FastMet ID", price: 200, icon: "🪪"},
+  { id: "6", name: "Reflector Vest", price: 50, icon: "🦺" },
+  { id: "7", name: "Extra Space", price: 60, icon: "📦" },
+  { id: "8", name: "Fire Extinguisher", price: 30, icon: "🧯" },
+  { id: "9", name: "Document Print", price: 100, icon: "📄" },
+  { id: "10", name: "FastMet ID", price: 200, icon: "🪪" },
 ];
 
 export const DUMMY = [
@@ -131,7 +131,7 @@ export default function Regular() {
 
         <FlatList
           data={DUMMY}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <Card
               pickup={item.pickup}
               dropoff={item.dropoff}
@@ -216,10 +216,10 @@ const Card = ({
         {/* Pickup & Drop */}
         <View className="relative flex-row items-center justify-between ml-5 mr-2 border-l border-dashed pl-7">
           <View className="gap-4">
-            <Text className="font-medium max-w-60" numberOfLines={2}>
+            <Text className="font-medium max-w-52" numberOfLines={2}>
               {pickup}
             </Text>
-            <Text className="font-medium max-w-60" numberOfLines={2}>
+            <Text className="font-medium max-w-52" numberOfLines={2}>
               {dropoff}
             </Text>
           </View>

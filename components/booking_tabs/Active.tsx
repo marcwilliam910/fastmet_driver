@@ -1,13 +1,13 @@
-import {Ionicons} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import {FlatList, Pressable, Text, View} from "react-native";
-import {DUMMY, serviceAddons} from "../request_tabs/Regular";
+import { FlatList, Pressable, Text, View } from "react-native";
+import { DUMMY, serviceAddons } from "../request_tabs/Regular";
 
 export default function Active() {
   return (
     <FlatList
       data={DUMMY}
-      renderItem={({item}) => (
+      renderItem={({ item }) => (
         <Card
           pickup={item.pickup}
           dropoff={item.dropoff}
@@ -86,10 +86,10 @@ const Card = ({
         {/* Pickup & Drop */}
         <View className="relative flex-row items-center justify-between ml-5 mr-2 border-l border-dashed pl-7">
           <View className="gap-4">
-            <Text className="font-medium max-w-60" numberOfLines={2}>
+            <Text className="font-medium max-w-52" numberOfLines={2}>
               {pickup}
             </Text>
-            <Text className="font-medium max-w-60" numberOfLines={2}>
+            <Text className="font-medium max-w-52" numberOfLines={2}>
               {dropoff}
             </Text>
           </View>

@@ -1,7 +1,7 @@
-import {Ionicons} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import {Modal, Pressable, ScrollView, Text, View} from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SeeMoreModal({
   visible,
@@ -37,7 +37,7 @@ export default function SeeMoreModal({
         <ScrollView
           className="flex-1 px-4"
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{gap: 20, paddingBottom: 30}}
+          contentContainerStyle={{ gap: 20, paddingBottom: 30 }}
         >
           {/* Location Details */}
           <View className="p-5 bg-gray-50 rounded-2xl">
@@ -49,13 +49,13 @@ export default function SeeMoreModal({
               <View className="gap-4">
                 <Text
                   className="text-sm font-medium max-w-60"
-                  numberOfLines={2}
+                  // numberOfLines={2}
                 >
                   {data.pickup}
                 </Text>
                 <Text
                   className="text-sm font-medium max-w-60"
-                  numberOfLines={2}
+                  // numberOfLines={2}
                 >
                   {data.dropoff}
                 </Text>
@@ -163,7 +163,7 @@ export default function SeeMoreModal({
                   <View
                     key={index}
                     className="items-center justify-center bg-gray-200 rounded-xl"
-                    style={{width: 95, height: 95}}
+                    style={{ width: 95, height: 95 }}
                   >
                     <Text className="text-gray-500">Image {index + 1}</Text>
                   </View>
