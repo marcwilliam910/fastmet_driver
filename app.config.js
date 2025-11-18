@@ -53,6 +53,21 @@ export default {
           },
         },
       ],
+      [
+        "expo-build-properties",
+        {
+          ios: {
+            useFrameworks: "static",
+          },
+        },
+      ],
+      [
+        "@rnmapbox/maps",
+        {
+          RNMapboxMapsImpl: "mapbox",
+        },
+      ],
+      "expo-web-browser",
     ],
     experiments: {
       typedRoutes: true,

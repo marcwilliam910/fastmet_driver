@@ -1,180 +1,261 @@
-import { STATIC_IMAGES } from "@/utils/constants";
+import {
+  MANEUVER_MAP,
+  MAPBOX_PUBLIC_KEY,
+  STATIC_IMAGES,
+} from "@/utils/constants";
+import { formatDistance, formatInstruction, formatTime } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
-import polyline from "@mapbox/polyline";
+import MapboxGL, { UserTrackingMode } from "@rnmapbox/maps";
 import * as Location from "expo-location";
-import { computeDestinationPoint, getDistance } from "geolib";
+import { computeDestinationPoint } from "geolib";
 import { useEffect, useRef, useState } from "react";
 import {
   Alert,
-  Platform,
+  Image,
   Pressable,
+  StatusBar,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import MapView, { Marker, Polyline, Region } from "react-native-maps";
-import MapViewDirections from "react-native-maps-directions";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const GOOGLE_MAPS_API_KEY =
-  Platform.OS === "ios"
-    ? process.env.EXPO_PUBLIC_IOS_MAP_KEY
-    : process.env.EXPO_PUBLIC_ANDROID_MAP_KEY;
+MapboxGL.setAccessToken(MAPBOX_PUBLIC_KEY);
 
 type ManeuverInfo = {
   text: string;
   distance: string;
+  distanceMeters: number;
   maneuver: string;
 };
 
-interface Camera {
-  center: { latitude: number; longitude: number };
-  pitch?: number;
-  heading?: number;
-  altitude?: number;
-  zoom?: number;
-}
+const pickUp = { coords: { lat: 14.84593, lng: 120.81167 } };
+const dropOff = { coords: { lat: 14.82827, lng: 120.73592 } };
 
-// Dummy pickup/drop-off points
-const pickUp = { coords: { lat: 14.84593, lng: 120.81167 } }; // Bulsu Hagonoy
-const dropOff = { coords: { lat: 14.82827, lng: 120.73592 } }; // Bulsu Malolos
-
-export default function MapScreen() {
-  const mapRef = useRef<MapView>(null);
-  const [driverRegion, setDriverRegion] = useState<Region | null>(null);
-  const [driveMode, setDriveMode] = useState(false);
-  const [routeCoords, setRouteCoords] = useState<
-    { latitude: number; longitude: number }[]
-  >([]);
-  const [instruction, setInstruction] = useState<ManeuverInfo | null>(null);
-  const [lastLocation, setLastLocation] =
+export default function MapboxDriverMap() {
+  const mapRef = useRef<MapboxGL.MapView>(null);
+  const cameraRef = useRef<MapboxGL.Camera>(null);
+  const locationSubscription = useRef<Location.LocationSubscription | null>(
+    null
+  );
+  const [driverLocation, setDriverLocation] =
     useState<Location.LocationObjectCoords | null>(null);
+  const [isDriving, setIsDriving] = useState(false);
+  const [routeCoords, setRouteCoords] = useState<number[][]>([]);
+  const [instruction, setInstruction] = useState<ManeuverInfo | null>(null);
+  const [totalDistance, setTotalDistance] = useState<string | null>(null);
+  const [estimatedTime, setEstimatedTime] = useState<string | null>(null);
+  const [allSteps, setAllSteps] = useState<any[]>([]);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Format maneuver text
-  const formatInstruction = (text: string) => {
-    const cleanText = text.split("Pass by")[0].trim();
-    const roadMatch = cleanText.match(/on (.+?)(?:\/|$)/);
-    if (roadMatch) return roadMatch[1].split("/")[0].trim();
-    return cleanText.length > 40
-      ? cleanText.substring(0, 40) + "..."
-      : cleanText;
-  };
+  const insets = useSafeAreaInsets();
 
   const renderArrow = (maneuver: string) => {
+    const iconProps = { size: 32, color: "#FB923C" }; // Orange color
+
     switch (maneuver) {
       case "turn-left":
       case "turn-slight-left":
-        return <Ionicons name="arrow-back" size={30} color="#000" />;
+        return <Ionicons name="arrow-back" {...iconProps} />;
+      case "turn-sharp-left":
+        return <Ionicons name="return-up-back" {...iconProps} />;
       case "turn-right":
       case "turn-slight-right":
-        return <Ionicons name="arrow-forward" size={30} color="#000" />;
+        return <Ionicons name="arrow-forward" {...iconProps} />;
+      case "turn-sharp-right":
+        return <Ionicons name="return-up-forward" {...iconProps} />;
       case "merge":
-        return <Ionicons name="arrow-down" size={30} color="#000" />;
+        return <Ionicons name="git-merge" {...iconProps} />;
+      case "roundabout-left":
+      case "roundabout-right":
+        return <Ionicons name="radio-button-on" {...iconProps} />;
+      case "arrive":
+        return <Ionicons name="location" {...iconProps} />;
+      case "depart":
+        return <Ionicons name="play-circle" {...iconProps} />;
       default:
-        return <Ionicons name="arrow-up" size={30} color="#000" />;
+        return <Ionicons name="arrow-up" {...iconProps} />;
     }
   };
 
   const activateDriveMode = async () => {
-    setDriveMode(true);
-
     const { status } = await Location.requestForegroundPermissionsAsync();
+
     if (status !== "granted") {
       Alert.alert(
         "Permission Required",
-        "Location permission is needed to show your position."
+        "Location permission is needed for navigation."
       );
       return;
     }
 
-    const loc = await Location.getCurrentPositionAsync({});
-    animateCamera(
-      loc.coords.latitude,
-      loc.coords.longitude,
-      loc.coords.heading ?? 0
-    );
-  };
+    setIsLoading(true);
+    setIsDriving(true);
 
-  const animateCamera = (lat: number, lng: number, heading: number) => {
-    const offset = computeDestinationPoint(
-      { latitude: lat, longitude: lng },
-      50,
-      heading
-    );
-    const camera: Partial<Camera> = {
-      center: { latitude: offset.latitude, longitude: offset.longitude },
-      pitch: 60,
-      heading,
-      zoom: 17,
-    };
-    mapRef.current?.animateCamera(camera, { duration: 1000 });
-  };
-
-  // INITIAL + LIVE DRIVER LOCATION
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Location permission is required.");
-        return;
-      }
-
-      const loc = await Location.getCurrentPositionAsync({});
-      setDriverRegion({
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
+    try {
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
       });
 
-      fetchRouteSteps(
+      setDriverLocation(loc.coords);
+
+      await fetchRouteSteps(
         loc.coords.latitude,
         loc.coords.longitude,
         pickUp.coords.lat,
         pickUp.coords.lng
       );
 
-      if (driveMode) return; // live updates only if driveMode
+      animateCamera(
+        loc.coords.latitude,
+        loc.coords.longitude,
+        loc.coords.heading ?? 0
+      );
+    } catch (error) {
+      console.error("Error activating drive mode:", error);
+      Alert.alert("Error", "Failed to get your location");
+      setIsDriving(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-      const MIN_DISTANCE = 5; // meters
-      const MIN_HEADING_CHANGE = 10; // degrees
+  const animateCamera = (lat: number, lng: number, heading: number) => {
+    const cameraCenterOffset = computeDestinationPoint(
+      { latitude: lat, longitude: lng },
+      150,
+      heading
+    );
+
+    cameraRef.current?.setCamera({
+      centerCoordinate: [
+        cameraCenterOffset.longitude,
+        cameraCenterOffset.latitude,
+      ],
+      pitch: 65,
+      heading: heading,
+      zoomLevel: 17.5,
+      animationDuration: 600,
+    });
+  };
+
+  // Update current instruction based on driver's position
+  const updateCurrentInstruction = (coords: Location.LocationObjectCoords) => {
+    if (!allSteps.length || !isDriving) return;
+
+    // Simple distance-based step progression
+    const currentStep = allSteps[currentStepIndex];
+    if (!currentStep) return;
+
+    const stepCoords = currentStep.maneuver.location;
+    const distance = getDistance(
+      coords.latitude,
+      coords.longitude,
+      stepCoords[1],
+      stepCoords[0]
+    );
+
+    // If within 20 meters of next step, advance
+    if (distance < 20 && currentStepIndex < allSteps.length - 1) {
+      const nextStepIndex = currentStepIndex + 1;
+      setCurrentStepIndex(nextStepIndex);
+      const nextStep = allSteps[nextStepIndex];
+
+      setInstruction({
+        text: nextStep.maneuver.instruction,
+        distance: formatDistance(nextStep.distance),
+        distanceMeters: nextStep.distance,
+        maneuver: nextStep.maneuver.type ?? "straight",
+      });
+    } else {
+      // Update distance to current step
+      setInstruction((prev) =>
+        prev
+          ? {
+              ...prev,
+              distance: formatDistance(distance),
+              distanceMeters: distance,
+            }
+          : null
+      );
+    }
+  };
+
+  // Simple distance calculation
+  const getDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number => {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
+  };
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") return;
+
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      setDriverLocation(loc.coords);
+
+      await fetchRouteSteps(
+        loc.coords.latitude,
+        loc.coords.longitude,
+        pickUp.coords.lat,
+        pickUp.coords.lng
+      );
+
+      // Clean up previous subscription
+      if (locationSubscription.current) {
+        locationSubscription.current.remove();
+      }
 
       const subscription = await Location.watchPositionAsync(
         {
-          accuracy: Location.Accuracy.Highest,
-          timeInterval: 5000,
-          distanceInterval: 5, // still report all small movements
+          accuracy: Location.Accuracy.High,
+          timeInterval: 2000,
+          distanceInterval: 5,
         },
         (loc) => {
-          const { latitude, longitude, heading } = loc.coords;
+          setDriverLocation(loc.coords);
 
-          if (lastLocation) {
-            const dist = getDistance(
-              { latitude, longitude },
-              {
-                latitude: lastLocation.latitude,
-                longitude: lastLocation.longitude,
-              }
+          if (isDriving) {
+            animateCamera(
+              loc.coords.latitude,
+              loc.coords.longitude,
+              loc.coords.heading ?? 0
             );
-
-            const headingDiff = Math.abs(
-              (heading ?? 0) - (lastLocation.heading ?? 0)
-            );
-
-            if (dist < MIN_DISTANCE && headingDiff < MIN_HEADING_CHANGE) {
-              return; // Ignore tiny movements
-            }
+            updateCurrentInstruction(loc.coords);
           }
-
-          setLastLocation(loc.coords);
-          animateCamera(latitude, longitude, heading ?? 0);
         }
       );
 
-      return () => subscription.remove();
-    })();
-  }, [driveMode, lastLocation]);
+      locationSubscription.current = subscription;
 
-  /** FETCH TURN-BY-TURN INSTRUCTIONS */
+      return () => {
+        subscription.remove();
+      };
+    })();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDriving]);
+
   async function fetchRouteSteps(
     originLat: number,
     originLng: number,
@@ -182,148 +263,295 @@ export default function MapScreen() {
     destLng: number
   ) {
     try {
-      const res = await fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${originLat},${originLng}&destination=${destLat},${destLng}&key=${GOOGLE_MAPS_API_KEY}`
-      );
+      const url = `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/${originLng},${originLat};${destLng},${destLat}?geometries=geojson&steps=true&overview=full&banner_instructions=true&voice_instructions=true&access_token=${MAPBOX_PUBLIC_KEY}`;
+      const res = await fetch(url);
       const json = await res.json();
-      if (!json.routes?.length) return;
 
-      const points = polyline.decode(json.routes[0].overview_polyline.points);
-      setRouteCoords(
-        points.map(([lat, lng]) => ({ latitude: lat, longitude: lng }))
-      );
+      const route = json.routes[0];
+      if (!route) return;
 
-      const steps = json.routes[0].legs[0]?.steps ?? [];
-      if (!steps.length) return;
+      const coords = route.geometry?.coordinates ?? [];
+      setRouteCoords(coords);
 
-      const next = steps[0];
-      setInstruction({
-        text: next.html_instructions.replace(/<[^>]+>/g, ""),
-        distance: next.distance.text,
-        maneuver: next.maneuver ?? "straight",
-      });
+      setTotalDistance(formatDistance(route.distance));
+      setEstimatedTime(formatTime(route.duration));
+
+      const steps = route.legs[0]?.steps ?? [];
+      setAllSteps(steps);
+      setCurrentStepIndex(0);
+
+      const firstStep = steps[0];
+      if (firstStep) {
+        setInstruction({
+          text: firstStep.maneuver.instruction,
+          distance: formatDistance(firstStep.distance),
+          distanceMeters: firstStep.distance,
+          maneuver: firstStep.maneuver.type ?? "straight",
+        });
+      }
     } catch (err) {
-      console.log("Directions error:", err);
+      console.error("Mapbox Directions error:", err);
+      Alert.alert("Error", "Failed to fetch route");
     }
   }
 
+  const MarkerImage = ({ source }: { source: any }) => (
+    <Image source={source} style={styles.markerImage} />
+  );
+
   return (
-    <View className="flex-1">
-      {driverRegion && (
-        <MapView
-          ref={mapRef}
-          style={StyleSheet.absoluteFillObject}
-          initialRegion={driverRegion}
-          showsUserLocation
-          followsUserLocation
+    <View style={styles.container}>
+      <StatusBar hidden />
+      <MapboxGL.MapView
+        ref={mapRef}
+        style={styles.map}
+        styleURL={MapboxGL.StyleURL.Street}
+        compassEnabled={false}
+        rotateEnabled={!isDriving}
+        pitchEnabled={!isDriving}
+        logoEnabled={false}
+        attributionEnabled={false}
+        scaleBarEnabled={false}
+      >
+        <MapboxGL.Camera
+          ref={cameraRef}
+          followUserLocation={isDriving}
+          followUserMode={UserTrackingMode.FollowWithCourse}
+          centerCoordinate={[pickUp.coords.lng, pickUp.coords.lat]} // default on mount
+          zoomLevel={isDriving ? 17.5 : 16.5}
+          pitch={isDriving ? 65 : 0}
+        />
+
+        {/* Hide default user location */}
+        <MapboxGL.UserLocation visible={false} />
+
+        {/* Custom driver location arrow */}
+        <MapboxGL.Images
+          images={{ navigationArrow: STATIC_IMAGES.currentLoc }}
+        />
+
+        {driverLocation && (
+          <MapboxGL.ShapeSource
+            id="driverLocationSource"
+            shape={{
+              type: "Feature",
+              geometry: {
+                type: "Point",
+                coordinates: [
+                  driverLocation.longitude,
+                  driverLocation.latitude,
+                ],
+              },
+              properties: {},
+            }}
+          >
+            <MapboxGL.SymbolLayer
+              id="driverArrow"
+              aboveLayerID="routeLine"
+              style={{
+                // Step 2: Reference the image by its key/ID instead of using require().
+                iconImage: "navigationArrow",
+                iconSize: 0.4,
+                iconRotate: driverLocation.heading ?? 0,
+                iconRotationAlignment: "map",
+                iconAllowOverlap: true,
+                iconIgnorePlacement: true,
+                iconPitchAlignment: "map",
+              }}
+            />
+          </MapboxGL.ShapeSource>
+        )}
+
+        {/* pick up */}
+        <MapboxGL.PointAnnotation
+          id="pickup"
+          coordinate={[pickUp.coords.lng, pickUp.coords.lat]}
         >
-          <Marker
-            coordinate={{
-              latitude: pickUp.coords.lat,
-              longitude: pickUp.coords.lng,
-            }}
-            title="Pick Up"
-            image={STATIC_IMAGES.pickup}
-          />
-          <Marker
-            coordinate={{
-              latitude: dropOff.coords.lat,
-              longitude: dropOff.coords.lng,
-            }}
-            title="Drop Off"
-            image={STATIC_IMAGES.dropoff}
-          />
+          <MarkerImage source={STATIC_IMAGES.pickup} />
+        </MapboxGL.PointAnnotation>
 
-          <Marker
-            coordinate={{
-              latitude: driverRegion.latitude,
-              longitude: driverRegion.longitude,
-            }}
-            title="You"
-          />
+        {/* drop off */}
+        <MapboxGL.PointAnnotation
+          id="dropoff"
+          coordinate={[dropOff.coords.lng, dropOff.coords.lat]}
+        >
+          <MarkerImage source={STATIC_IMAGES.dropoff} />
+        </MapboxGL.PointAnnotation>
 
-          <Polyline
-            coordinates={routeCoords}
-            strokeWidth={5}
-            strokeColor="#007AFF"
-          />
-
-          <MapViewDirections
-            origin={{
-              latitude: pickUp.coords.lat,
-              longitude: pickUp.coords.lng,
+        {routeCoords.length > 0 && (
+          <MapboxGL.ShapeSource
+            id="routeSource"
+            shape={{
+              type: "Feature",
+              geometry: { type: "LineString", coordinates: routeCoords },
+              properties: {},
             }}
-            destination={{
-              latitude: dropOff.coords.lat,
-              longitude: dropOff.coords.lng,
-            }}
-            apikey={GOOGLE_MAPS_API_KEY ?? ""}
-            strokeWidth={3}
-            strokeColor="#999"
-          />
-        </MapView>
-      )}
+          >
+            <MapboxGL.LineLayer
+              id="routeLine"
+              style={{
+                lineWidth: 6,
+                lineColor: "#034efc",
+                lineJoin: "round",
+                lineCap: "round",
+                lineOpacity: 0.9,
+              }}
+            />
+            <MapboxGL.LineLayer
+              id="routeOutline"
+              style={{
+                lineWidth: 8,
+                lineColor: "#FFFFFF",
+                lineJoin: "round",
+                lineCap: "round",
+                lineOpacity: 0.5,
+              }}
+              belowLayerID="routeLine"
+            />
+          </MapboxGL.ShapeSource>
+        )}
+      </MapboxGL.MapView>
 
-      {/* Top instruction card */}
+      {/* Enhanced instruction card */}
       {instruction && (
-        <View className="absolute top-10 left-0 right-0 items-center px-4">
-          <View className="w-full max-w-md bg-[#1F2A38] rounded-3xl border border-gray-600/30 overflow-hidden">
-            <View className="flex-row items-center px-5 py-4 gap-4">
-              {/* Arrow icon container */}
-              <View className="bg-[#FFB347] rounded-full p-3 shadow-md">
-                <View className="w-8 h-8 items-center justify-center">
+        <View className="absolute top-8 left-4 right-4 z-10">
+          <View className="bg-white rounded-3xl overflow-hidden">
+            {/* Top info bar */}
+            <View className="bg-lightPrimary px-5 py-3 flex-row justify-between items-center">
+              <View className="flex-row items-center gap-2">
+                <Ionicons name="time-outline" size={18} color="white" />
+                <Text className="text-white font-semibold text-sm">
+                  {estimatedTime || "Calculating..."}
+                </Text>
+              </View>
+
+              {isDriving ? (
+                <View className="bg-green-600 rounded-full px-4 py-1.5 flex-row items-center gap-2 ">
+                  <View className="w-2 h-2 bg-white rounded-full" />
+                  <Text className="text-white font-bold text-xs tracking-wide">
+                    NAVIGATING
+                  </Text>
+                </View>
+              ) : (
+                <View className="flex-row items-center gap-2">
+                  <Ionicons name="navigate-outline" size={18} color="white" />
+                  <Text className="text-white font-semibold text-sm">
+                    {totalDistance || "..."}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* Main instruction */}
+            <View className="flex-row items-center px-5 py-6 gap-4">
+              {/* Arrow icon box */}
+              <View className="bg-orange-200/70 rounded-2xl p-4 ">
+                <View style={styles.arrowContainer}>
                   {renderArrow(instruction.maneuver)}
                 </View>
               </View>
 
-              {/* Text and distance */}
-              <View className="flex-1 gap-2">
+              {/* Texts */}
+              <View className="flex-1 gap-1">
                 <Text
-                  className="font-extrabold text-xl text-white"
-                  numberOfLines={1}
+                  className="font-bold text-xl text-gray-900 leading-tight"
+                  numberOfLines={2}
                 >
                   {formatInstruction(instruction.text)}
                 </Text>
 
-                <Text className="text-sm text-gray-200">
-                  {maneuverTextMap[instruction.maneuver] || "Continue"}
+                <Text className="text-sm text-gray-500 tracking-wide">
+                  {MANEUVER_MAP[instruction.maneuver] || "Continue"}
+                </Text>
+              </View>
+
+              {/* Distance block */}
+              <View className="items-end justify-center min-w-[60px]">
+                <Text className="text-3xl font-extrabold text-orange-600">
+                  {instruction.distance}
                 </Text>
 
-                <View className="flex-row items-center gap-2">
-                  <View className="bg-[#FFB347]/25 rounded-lg px-3 py-1.5 border border-[#FFB347]/40">
-                    <Text className="text-sm font-semibold text-[#FFB347]">
-                      {instruction.distance}
-                    </Text>
+                {instruction.distanceMeters < 100 && (
+                  <View className="bg-red-600 rounded-full px-3 py-1 mt-1">
+                    <Text className="text-white text-xs font-bold">SOON</Text>
                   </View>
-                </View>
+                )}
               </View>
             </View>
+
+            {/* Drive Now Button */}
+            {!isDriving && driverLocation && routeCoords.length > 0 && (
+              <View className="px-5 pb-5">
+                <Pressable
+                  onPress={activateDriveMode}
+                  disabled={isLoading}
+                  className="bg-lightPrimary rounded-2xl px-6 py-4 flex-row items-center justify-center gap-3 active:bg-darkPrimary"
+                >
+                  {isLoading ? (
+                    <>
+                      <Ionicons name="hourglass" size={22} color="white" />
+                      <Text className="text-white font-bold text-lg">
+                        Loading...
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      <Ionicons name="car-sport" size={24} color="white" />
+                      <Text className="text-white font-bold text-lg">
+                        Drive Now
+                      </Text>
+                      <Ionicons name="arrow-forward" size={22} color="white" />
+                    </>
+                  )}
+                </Pressable>
+              </View>
+            )}
           </View>
         </View>
       )}
 
-      {/* Drive mode button */}
-      <Pressable
-        onPress={activateDriveMode}
-        className="absolute top-20 right-10 bg-white p-3 rounded-xl shadow"
-      >
-        <Ionicons name="car" size={22} color="black" />
-      </Pressable>
+      {/* Control buttons */}
+      {isDriving && (
+        <View
+          className="absolute right-2 flex-row z-20"
+          style={{
+            bottom: insets.bottom + 85,
+          }}
+        >
+          <Pressable
+            onPress={() => setIsDriving(false)}
+            disabled={isLoading}
+            className={`p-4 rounded-2xl bg-red-500 `}
+          >
+            <Ionicons
+              name="stop"
+              size={24}
+              color="white"
+              className="animate-pulse"
+            />
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
 
-const maneuverTextMap: Record<string, string> = {
-  "turn-left": "Turn left",
-  "turn-right": "Turn right",
-  merge: "Merge",
-  "roundabout-left": "Take the roundabout left",
-  "roundabout-right": "Take the roundabout right",
-  straight: "Go straight",
-  "ramp-left": "Take the left ramp",
-  "ramp-right": "Take the right ramp",
-  "fork-left": "Keep left",
-  "fork-right": "Keep right",
-  "uturn-left": "Make a U-turn left",
-  "uturn-right": "Make a U-turn right",
-};
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  map: {
+    flex: 1,
+  },
+  markerImage: {
+    width: 40,
+    height: 40,
+    resizeMode: "contain",
+  },
+  arrowContainer: {
+    width: 32,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
