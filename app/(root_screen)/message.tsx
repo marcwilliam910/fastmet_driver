@@ -1,7 +1,6 @@
 import { openGallery } from "@/utils/imagePicker";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -81,34 +80,75 @@ const Message = () => {
     }
   };
 
-  // Take photo with camera
-  const takePhoto = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+  // Take photo with camera (expo install expo-image-manipulator)
+  //  const takePhoto = async () => {
+  //   // Request camera permissions
+  //   const { status } = await ImagePicker.requestCameraPermissionsAsync();
+  //   if (status !== "granted") {
+  //     alert("Sorry, we need camera permissions!");
+  //     return;
+  //   }
 
-    if (status !== "granted") {
-      alert("Sorry, we need camera permissions!");
-      return;
-    }
+  //   // Request location permissions
+  //   const { status: locationStatus } = await Location.requestForegroundPermissionsAsync();
+  //   if (locationStatus !== "granted") {
+  //     alert("Location permission is required!");
+  //     return;
+  //   }
 
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      quality: 0.8,
-    });
+  //   // Launch camera
+  //   const result = await ImagePicker.launchCameraAsync({
+  //     allowsEditing: true,
+  //     quality: 0.8,
+  //   });
 
-    if (!result.canceled && result.assets[0]) {
-      const newMessage: IMessage = {
-        _id: Math.random().toString(),
-        text: "",
-        createdAt: new Date(),
-        user: {
-          _id: 1,
-          name: "Me",
-        },
-        image: result.assets[0].uri,
-      };
-      onSend([newMessage]);
-    }
-  };
+  //   if (!result.canceled && result.assets[0]) {
+  //     const photoUri = result.assets[0].uri;
+
+  //     // Get current location
+  //     const location = await Location.getCurrentPositionAsync({});
+  //     const latitude = location.coords.latitude.toFixed(5);
+  //     const longitude = location.coords.longitude.toFixed(5);
+
+  //     // Get timestamp
+  //     const timestamp = new Date().toLocaleString();
+
+  //     // Overlay timestamp and location onto the image
+  //     const manipulatedPhoto = await ImageManipulator.manipulateAsync(
+  //       photoUri,
+  //       [
+  //         {
+  //           drawText: {
+  //             text: timestamp,
+  //             position: { x: 10, y: result.assets[0].height - 30 },
+  //             color: "white",
+  //             fontSize: 20,
+  //           },
+  //         },
+  //         {
+  //           drawText: {
+  //             text: `${latitude}, ${longitude}`,
+  //             position: { x: result.assets[0].width - 10, y: result.assets[0].height - 30 },
+  //             color: "white",
+  //             fontSize: 20,
+  //             align: "right",
+  //           },
+  //         },
+  //       ],
+  //       { format: ImageManipulator.SaveFormat.JPEG }
+  //     );
+
+  //     // Send message with the new image
+  //     const newMessage: IMessage = {
+  //       _id: Math.random().toString(),
+  //       text: "",
+  //       createdAt: new Date(),
+  //       user: { _id: 1, name: "Me" },
+  //       image: manipulatedPhoto.uri,
+  //     };
+  //     onSend([newMessage]);
+  //   }
+  // };
 
   const renderInputToolbar = () => {
     return (
@@ -116,7 +156,7 @@ const Message = () => {
         <View className="flex-row items-end gap-3">
           <View className="flex-row items-center gap-3 h-11">
             {/* Camera */}
-            <Pressable onPress={takePhoto}>
+            <Pressable>
               <Ionicons name="camera" size={28} color="#FFA840" />
             </Pressable>
             {/* Gallery */}

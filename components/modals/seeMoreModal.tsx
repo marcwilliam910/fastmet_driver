@@ -7,10 +7,14 @@ export default function SeeMoreModal({
   visible,
   onClose,
   data,
+  onPress,
+  isAccepted,
 }: {
   visible: boolean;
   onClose: () => void;
   data: any;
+  onPress: () => void;
+  isAccepted: boolean;
 }) {
   if (!data) return null;
 
@@ -78,7 +82,7 @@ export default function SeeMoreModal({
             <View className="flex-row items-center justify-between p-3 mt-4 bg-white rounded-lg">
               <Text className="text-sm text-gray-600">Distance</Text>
               <Text className="text-lg font-bold text-lightPrimary">
-                {data.distance}
+                {data.distance}km
               </Text>
             </View>
           </View>
@@ -172,9 +176,16 @@ export default function SeeMoreModal({
             </View>
           )}
 
-          <Pressable className="items-center justify-center py-3 mx-4 rounded-lg bg-lightPrimary active:bg-darkPrimary">
-            <Text className="text-lg font-bold text-white">Accept Booking</Text>
-          </Pressable>
+          {!isAccepted && (
+            <Pressable
+              className="items-center justify-center py-3 mx-4 rounded-lg bg-lightPrimary active:bg-darkPrimary"
+              onPress={onPress}
+            >
+              <Text className="text-lg font-bold text-white">
+                Accept Booking
+              </Text>
+            </Pressable>
+          )}
         </ScrollView>
       </SafeAreaView>
     </Modal>

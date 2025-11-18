@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 import Popover, { PopoverPlacement } from "react-native-popover-view";
@@ -156,6 +157,8 @@ export default function Regular() {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         data={selectedRequest}
+        onPress={() => router.push("/(root_screen)/booking/pickup")}
+        isAccepted={false}
       />
     </>
   );
