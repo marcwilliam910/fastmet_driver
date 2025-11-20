@@ -9,10 +9,11 @@ import React, { useEffect, useState } from "react";
 import { BackHandler, Pressable, StatusBar, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+export const isInRadius = false;
+
 export default function PickUp() {
   const [showExitModal, setShowExitModal] = useState(false);
 
-  const isInRadius = false;
   const [isSeeMoreModalVisible, setIsSeeMoreModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
 
@@ -33,10 +34,7 @@ export default function PickUp() {
   }, []);
 
   return (
-    <View
-      style={{ flex: 1, backgroundColor: "white" }}
-      // edges={["right", "bottom", "left"]}
-    >
+    <View style={{ flex: 1, backgroundColor: "white" }}>
       <View className="relative flex-1">
         <MapScreen />
       </View>

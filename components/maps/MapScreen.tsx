@@ -1,3 +1,4 @@
+import { isInRadius } from "@/app/(root_screen)/booking/pickup";
 import {
   MANEUVER_MAP,
   MAPBOX_PUBLIC_KEY,
@@ -9,15 +10,7 @@ import MapboxGL, { UserTrackingMode } from "@rnmapbox/maps";
 import * as Location from "expo-location";
 import { computeDestinationPoint } from "geolib";
 import { useEffect, useRef, useState } from "react";
-import {
-  Alert,
-  Image,
-  Pressable,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Alert, Image, Pressable, StatusBar, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 MapboxGL.setAccessToken(MAPBOX_PUBLIC_KEY);
@@ -296,15 +289,18 @@ export default function MapboxDriverMap() {
   }
 
   const MarkerImage = ({ source }: { source: any }) => (
-    <Image source={source} style={styles.markerImage} />
+    <Image
+      source={source}
+      style={{ width: 40, height: 40, resizeMode: "contain" }}
+    />
   );
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1">
       <StatusBar hidden />
       <MapboxGL.MapView
         ref={mapRef}
-        style={styles.map}
+        style={{ flex: 1 }}
         styleURL={MapboxGL.StyleURL.Street}
         compassEnabled={false}
         rotateEnabled={!isDriving}
@@ -446,7 +442,7 @@ export default function MapboxDriverMap() {
             <View className="flex-row items-center px-5 py-6 gap-4">
               {/* Arrow icon box */}
               <View className="bg-orange-200/70 rounded-2xl p-4 ">
-                <View style={styles.arrowContainer}>
+                <View className="size-8 items-center justify-center">
                   {renderArrow(instruction.maneuver)}
                 </View>
               </View>
@@ -511,7 +507,7 @@ export default function MapboxDriverMap() {
       )}
 
       {/* Control buttons */}
-      {isDriving && (
+      {isDriving && !isInRadius && (
         <View
           className="absolute right-2 flex-row z-20"
           style={{
@@ -535,23 +531,3 @@ export default function MapboxDriverMap() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    flex: 1,
-  },
-  markerImage: {
-    width: 40,
-    height: 40,
-    resizeMode: "contain",
-  },
-  arrowContainer: {
-    width: 32,
-    height: 32,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
