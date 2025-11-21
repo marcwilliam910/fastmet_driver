@@ -1,3 +1,5 @@
+import { Booking } from "@/types/booking";
+import { formatDate } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
@@ -12,11 +14,16 @@ export default function SeeMoreModal({
 }: {
   visible: boolean;
   onClose: () => void;
-  data: any;
+  data: Booking;
   onPress: () => void;
   isAccepted: boolean;
 }) {
   if (!data) return null;
+
+  const totalServicesPrice = data.addedServices.reduce(
+    (total, service) => total + service.price,
+    0
+  );
 
   return (
     <Modal
@@ -32,8 +39,8 @@ export default function SeeMoreModal({
           <Pressable onPress={onClose} className="absolute left-4 top-1">
             <Ionicons name="chevron-back-outline" size={28} color="#FFA840" />
           </Pressable>
-          <Text className="text-lg font-semibold capitalize">
-            {data.bookingType}
+          <Text className="text-lg font-semibold uppercase">
+            {data.bookingType.type}
           </Text>
         </View>
 
@@ -51,17 +58,15 @@ export default function SeeMoreModal({
 
             <View className="relative flex-row items-center justify-between ml-5 mr-2 border-l border-dashed border-lightPrimary pl-7">
               <View className="gap-4">
-                <Text
-                  className="text-sm font-medium max-w-60"
-                  // numberOfLines={2}
-                >
-                  {data.pickup}
+                <Text className="text-sm font-medium max-w-60">
+                  {data.pickUp.address.includes(data.pickUp.name)
+                    ? data.pickUp.address
+                    : data.pickUp.name + ", " + data.pickUp.address}
                 </Text>
-                <Text
-                  className="text-sm font-medium max-w-60"
-                  // numberOfLines={2}
-                >
-                  {data.dropoff}
+                <Text className="text-sm font-medium max-w-60">
+                  {data.dropOff.address.includes(data.dropOff.name)
+                    ? data.dropOff.address
+                    : data.dropOff.name + ", " + data.dropOff.address}
                 </Text>
               </View>
 
@@ -82,8 +87,22 @@ export default function SeeMoreModal({
             <View className="flex-row items-center justify-between p-3 mt-4 bg-white rounded-lg">
               <Text className="text-sm text-gray-600">Distance</Text>
               <Text className="text-lg font-bold text-lightPrimary">
-                {data.distance}km
+                {data.routeData.distance}km
               </Text>
+            </View>
+
+            {/* Booking Type */}
+            <View className="flex-row items-center justify-between p-3 mt-0 bg-white rounded-lg">
+              <Text className="text-sm font-bold text-gray-600">
+                {data.bookingType.type === "schedule"
+                  ? "Schedule"
+                  : data.bookingType.value}
+              </Text>
+              {data.bookingType.type === "schedule" && (
+                <Text className="text-sm font-bold text-gray-600">
+                  {formatDate(data.bookingType.value || "")}
+                </Text>
+              )}
             </View>
           </View>
 
@@ -95,28 +114,38 @@ export default function SeeMoreModal({
             <View className="flex-row items-center justify-between p-4 bg-white rounded-xl">
               <View className="flex-row items-center">
                 <Ionicons
-                  name={data.isCash ? "cash-outline" : "card-outline"}
+                  name={
+                    data.paymentMethod === "cash"
+                      ? "cash-outline"
+                      : "card-outline"
+                  }
                   size={22}
                   color="#666"
                 />
                 <Text className="ml-3 text-base text-gray-600">
-                  {data.isCash ? "Cash Payment" : "Online Payment"}
+                  {data.paymentMethod === "cash"
+                    ? "Cash Payment"
+                    : "Online Payment"}
                 </Text>
               </View>
               <Text className="text-xl font-bold text-darkPrimary">
-                Php {data.amount.toLocaleString("en-US")}
+                Php{" "}
+                {data.routeData.price.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </Text>
             </View>
           </View>
 
           {/* Selected Services */}
-          {data.selectedServices && data.selectedServices.length > 0 && (
+          {data.addedServices && data.addedServices.length > 0 && (
             <View className="p-5 bg-gray-50 rounded-2xl">
               <Text className="mb-3 text-base font-semibold text-gray-800">
-                Selected Services ({data.selectedServices.length})
+                Selected Services ({data.addedServices.length})
               </Text>
               <View className="gap-2">
-                {data.selectedServices.map((service: any) => (
+                {data.addedServices.map((service: any) => (
                   <View
                     key={service.id}
                     className="flex-row items-center justify-between p-4 bg-white rounded-xl"
@@ -132,6 +161,20 @@ export default function SeeMoreModal({
                     </Text>
                   </View>
                 ))}
+              </View>
+
+              <View className="flex-row items-center justify-between p-4 rounded-xl">
+                <Text className="text-base font-semibold text-gray-800">
+                  Total
+                </Text>
+                <Text className="font-semibold text-lightPrimary">
+                  {totalServicesPrice > 0
+                    ? `Php ${totalServicesPrice.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}`
+                    : "FREE"}
+                </Text>
               </View>
             </View>
           )}

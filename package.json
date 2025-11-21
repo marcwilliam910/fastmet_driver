@@ -22,6 +22,7 @@
     "@rnmapbox/maps": "^10.2.7",
     "@tanstack/react-query": "^5.90.10",
     "@xtayaitak/react-native-photo-manipulator": "^3.0.3",
+    "axios": "^1.13.2",
     "expo": "~54.0.13",
     "expo-build-properties": "~1.0.9",
     "expo-constants": "~18.0.9",
@@ -59,6 +60,7 @@
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.5.1",
     "rn-swipe-button": "^3.0.1",
+    "socket.io-client": "^4.8.1",
     "tailwindcss": "^3.4.18",
     "zustand": "^5.0.8"
   },

@@ -1,4 +1,3 @@
-import { isInRadius } from "@/app/(root_screen)/booking/pickup";
 import {
   MANEUVER_MAP,
   MAPBOX_PUBLIC_KEY,
@@ -507,7 +506,7 @@ export default function MapboxDriverMap() {
       )}
 
       {/* Control buttons */}
-      {isDriving && !isInRadius && (
+      {isDriving && (
         <View
           className="absolute right-2 flex-row z-20"
           style={{

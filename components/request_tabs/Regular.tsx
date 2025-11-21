@@ -1,3 +1,7 @@
+import { useDutyStore } from "@/store/useDutyStore";
+import { useRequestBookingStore } from "@/store/useRequestBookingStore";
+import { Services } from "@/types/booking";
+import { formatDate } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -5,75 +9,14 @@ import { FlatList, Pressable, Text, View } from "react-native";
 import Popover, { PopoverPlacement } from "react-native-popover-view";
 import SeeMoreModal from "../modals/seeMoreModal";
 
-export const serviceAddons = [
-  { id: "3", name: "Small Truck", price: 100, icon: "🚚" },
-  { id: "4", name: "Safety Shoes", price: 100, icon: "👞" },
-  {
-    id: "5",
-    name: "1 Extra Helper",
-    price: 100,
-    icon: "🧑",
-  },
-  { id: "6", name: "Reflector Vest", price: 50, icon: "🦺" },
-  { id: "7", name: "Extra Space", price: 60, icon: "📦" },
-  { id: "8", name: "Fire Extinguisher", price: 30, icon: "🧯" },
-  { id: "9", name: "Document Print", price: 100, icon: "📄" },
-  { id: "10", name: "FastMet ID", price: 200, icon: "🪪" },
-];
-
-export const DUMMY = [
-  {
-    id: "1",
-    pickup: "1234 Long Address St. Brgy. Name, City Name, Province Name, 1234",
-    dropoff:
-      "5678 Another Long Address Ave. Brgy. Different, City Name, Province Name, 5678",
-    distance: 12,
-    amount: 1500,
-    isCash: true,
-    selectedServices: serviceAddons,
-    bookingType: "ASAP",
-    note: "I need to get to the airport",
-    images: [1, 2, 3],
-  },
-  // {
-  //   id: "2",
-  //   pickup: "1234 Long Address St. Brgy. Name, City Name, Province Name, 1234",
-  //   dropoff:
-  //     "5678 Another Long Address Ave. Brgy. Different, City Name, Province Name, 5678",
-  //   distance: "12 km",
-  //   amount: 1500,
-  //   isCash: true,
-  //   services: serviceAddons,
-  //   bookingType: "ASAP",
-  // },
-  // {
-  //   id: "3",
-  //   pickup: "1234 Long Address St. Brgy. Name, City Name, Province Name, 1234",
-  //   dropoff:
-  //     "5678 Another Long Address Ave. Brgy. Different, City Name, Province Name, 5678",
-  //   distance: "12 km",
-  //   amount: 1500,
-  //   isCash: true,
-  //   services: serviceAddons,
-  //   bookingType: "ASAP",
-  // },
-  // {
-  //   id: "4",
-  //   pickup: "1234 Long Address St. Brgy. Name, City Name, Province Name, 1234",
-  //   dropoff:
-  //     "5678 Another Long Address Ave. Brgy. Different, City Name, Province Name, 5678",
-  //   distance: "12 km",
-  //   amount: 1500,
-  //   isCash: true,
-  //   services: serviceAddons,
-  //   bookingType: "ASAP",
-  // },
-];
-
 export default function Regular() {
   const [selectedFilters, setSelectedFilters] = useState(["ASAP", "Schedule"]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const incomingBooking = useRequestBookingStore(
+    (state) => state.incomingBooking
+  );
+  const onDuty = useDutyStore((state) => state.onDuty);
 
   const handleSeeMorePress = (request: any) => {
     setSelectedRequest(request);
@@ -90,76 +33,98 @@ export default function Regular() {
   };
   return (
     <>
-      <View className="flex-1 gap-5 px-4 bg-white">
-        <View className="flex-row items-center justify-between gap-3 pt-3 pb-0 mx-3">
-          <Text className="font-bold">
-            {selectedFilters.length === 2
-              ? selectedFilters.join(" and ")
-              : selectedFilters[0]}
-          </Text>
-          <Popover
-            placement={PopoverPlacement.LEFT}
-            from={
-              <Pressable>
-                <Ionicons name="options" size={28} color="black" />
-              </Pressable>
-            }
-          >
-            <View className="w-40">
-              <View className="px-2 py-2 bg-lightPrimary ">
-                <Text className="text-lg font-bold text-white">Filter</Text>
-              </View>
-              {["ASAP", "Schedule"].map((option) => (
-                <Pressable
-                  onPress={() => handleFilterPress(option)}
-                  key={option}
-                  className="flex-row items-center justify-between p-3 active:scale-105"
-                >
-                  <Text className="font-semibold">{option}</Text>
-                  {
-                    // Check if the option is selected
-                    selectedFilters.includes(option) ? (
-                      <Ionicons name="checkbox" size={24} color="#FFA840" />
-                    ) : (
-                      <Ionicons name="square" size={24} color="#999" />
-                    )
-                  }
-                </Pressable>
-              ))}
-            </View>
-          </Popover>
-        </View>
+      {incomingBooking.length === 0 ? (
+        <View className="bg-white flex-1 px-8 py-12">
+          <View className="items-center">
+            <Ionicons name="alert-circle-outline" size={80} color="#9CA3AF" />
 
-        <FlatList
-          data={DUMMY}
-          renderItem={({ item }) => (
-            <Card
-              pickup={item.pickup}
-              dropoff={item.dropoff}
-              distance={item.distance}
-              amount={item.amount}
-              isCash={item.isCash}
-              services={item.selectedServices}
-              bookingType={item.bookingType}
-              onPressSeeMore={() => handleSeeMorePress(item)}
+            <Text className="text-2xl font-bold text-gray-800 mt-6 text-center">
+              No Incoming Requests
+            </Text>
+
+            <Text className="text-base text-gray-500 text-center mt-2">
+              {onDuty
+                ? "You are on duty. New booking requests will appear here."
+                : "Switch to On Duty mode to start receiving booking requests."}
+            </Text>
+          </View>
+        </View>
+      ) : (
+        <>
+          <View className="flex-1 gap-5 px-4 bg-white">
+            <View className="flex-row items-center justify-between gap-3 pt-3 pb-0 mx-3">
+              <Text className="font-bold">
+                {selectedFilters.length === 2
+                  ? selectedFilters.join(" and ")
+                  : selectedFilters[0]}
+              </Text>
+              <Popover
+                placement={PopoverPlacement.LEFT}
+                from={
+                  <Pressable>
+                    <Ionicons name="options" size={28} color="black" />
+                  </Pressable>
+                }
+              >
+                <View className="w-40">
+                  <View className="px-2 py-2 bg-lightPrimary ">
+                    <Text className="text-lg font-bold text-white">Filter</Text>
+                  </View>
+                  {["ASAP", "Schedule"].map((option) => (
+                    <Pressable
+                      onPress={() => handleFilterPress(option)}
+                      key={option}
+                      className="flex-row items-center justify-between p-3 active:scale-105"
+                    >
+                      <Text className="font-semibold">{option}</Text>
+                      {
+                        // Check if the option is selected
+                        selectedFilters.includes(option) ? (
+                          <Ionicons name="checkbox" size={24} color="#FFA840" />
+                        ) : (
+                          <Ionicons name="square" size={24} color="#999" />
+                        )
+                      }
+                    </Pressable>
+                  ))}
+                </View>
+              </Popover>
+            </View>
+
+            <FlatList
+              data={incomingBooking}
+              renderItem={({ item }) => (
+                <Card
+                  pickup={item.pickUp.address}
+                  dropoff={item.dropOff.address}
+                  distance={item.routeData.distance}
+                  amount={item.routeData.price}
+                  isCash={item.paymentMethod === "cash"}
+                  services={item.addedServices}
+                  bookingType={item.bookingType}
+                  onPressSeeMore={() => handleSeeMorePress(item)}
+                />
+              )}
+              keyExtractor={(item) => item._id}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{
+                paddingBottom: 40,
+                gap: 15,
+              }}
+            />
+          </View>
+
+          {selectedRequest && (
+            <SeeMoreModal
+              visible={modalVisible}
+              onClose={() => setModalVisible(false)}
+              data={selectedRequest}
+              onPress={() => router.push("/(root_screen)/booking/pickup")}
+              isAccepted={false}
             />
           )}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingBottom: 40,
-            gap: 15,
-          }}
-        />
-      </View>
-
-      <SeeMoreModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        data={selectedRequest}
-        onPress={() => router.push("/(root_screen)/booking/pickup")}
-        isAccepted={false}
-      />
+        </>
+      )}
     </>
   );
 }
@@ -170,8 +135,11 @@ type CardProps = {
   distance: number;
   amount: number;
   isCash: boolean;
-  services: typeof serviceAddons;
-  bookingType: string;
+  services: Services[];
+  bookingType: {
+    type: string; // "asap" | "schedule"
+    value: string | null;
+  };
   onPressSeeMore: () => void;
 };
 
@@ -202,7 +170,12 @@ const Card = ({
     >
       {/* Header */}
       <View className="flex-row items-center justify-between px-5 py-3 bg-lightPrimary">
-        <Text className="text-lg font-semibold text-white">{bookingType}</Text>
+        <Text className="text-lg font-semibold text-white">
+          {" "}
+          {bookingType.type === "schedule"
+            ? `Schedule: ${formatDate(bookingType.value || "")}`
+            : bookingType.value}
+        </Text>
         {/* <Pressable
           className="flex-row items-center gap-2 active:scale-105"
         //   onPress={() => router.push("/(root_screens)/booking/viewOnMap")}
@@ -226,7 +199,7 @@ const Card = ({
               {dropoff}
             </Text>
           </View>
-          <Text className="font-bold">{distance}km</Text>
+          <Text className="font-bold">{distance.toFixed(1)}km</Text>
 
           <Ionicons
             name="location-sharp"
@@ -261,7 +234,11 @@ const Card = ({
             {isCash ? "Cash Payment" : "Online Payment"}
           </Text>
           <Text className="text-lg font-semibold text-darkPrimary">
-            Php {amount.toLocaleString("en-US")}
+            Php{" "}
+            {amount.toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
           </Text>
         </View>
 
