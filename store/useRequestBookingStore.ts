@@ -12,7 +12,7 @@ interface RequestBookingState {
 export const useRequestBookingStore = create<RequestBookingState>((set) => ({
   incomingBooking: [],
   addIncomingBooking: (b) =>
-    set((state) => ({ incomingBooking: [...state.incomingBooking, b] })),
+    set((state) => ({ incomingBooking: [b, ...state.incomingBooking] })),
   setIncomingBooking: (b) => set({ incomingBooking: b }),
   removeIncomingBooking: (b) =>
     set((state) => ({

@@ -1,7 +1,7 @@
 import { useRequestBookings } from "@/queries/bookingQueries";
 import { useDutyStore } from "@/store/useDutyStore";
 import React, { createContext, useContext, useEffect } from "react";
-import { receiveBookingRequest } from "../handlers/booking";
+import { dutyStatusChanged, receiveBookingRequest } from "../handlers/booking";
 import { getSocket } from "../socket";
 
 interface SocketContextType {
@@ -26,9 +26,11 @@ export default function SocketProvider({
     socket.connect();
 
     // // Always-on listeners (like messaging)
+    dutyStatusChanged(socket);
 
     return () => {
       socket.disconnect();
+      socket.off("dutyStatusChanged");
     };
   }, [socket]);
 

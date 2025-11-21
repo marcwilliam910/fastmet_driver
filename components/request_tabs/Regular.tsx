@@ -4,7 +4,7 @@ import { Services } from "@/types/booking";
 import { formatDate } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 import Popover, { PopoverPlacement } from "react-native-popover-view";
 import SeeMoreModal from "../modals/seeMoreModal";
@@ -17,6 +17,10 @@ export default function Regular() {
     (state) => state.incomingBooking
   );
   const onDuty = useDutyStore((state) => state.onDuty);
+
+  const regularBookings = useMemo(() => {
+    return incomingBooking.filter((b) => b.bookingType.type !== "pooling");
+  }, [incomingBooking]);
 
   const handleSeeMorePress = (request: any) => {
     setSelectedRequest(request);
@@ -33,7 +37,7 @@ export default function Regular() {
   };
   return (
     <>
-      {incomingBooking.length === 0 ? (
+      {regularBookings.length === 0 ? (
         <View className="bg-white flex-1 px-8 py-12">
           <View className="items-center">
             <Ionicons name="alert-circle-outline" size={80} color="#9CA3AF" />
@@ -92,7 +96,7 @@ export default function Regular() {
             </View>
 
             <FlatList
-              data={incomingBooking}
+              data={regularBookings}
               renderItem={({ item }) => (
                 <Card
                   pickup={item.pickUp.address}
@@ -143,7 +147,7 @@ type CardProps = {
   onPressSeeMore: () => void;
 };
 
-const Card = ({
+export const Card = ({
   pickup,
   dropoff,
   distance,

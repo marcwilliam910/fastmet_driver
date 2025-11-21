@@ -12,7 +12,7 @@ import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
 
 const HeaderTabs = () => {
   const navigation = useNavigation();
-  const { onDuty, setOnDuty } = useDutyStore();
+  const { onDuty } = useDutyStore();
   const clearIncomingBookings = useRequestBookingStore(
     (s) => s.clearIncomingBooking
   );
@@ -25,14 +25,12 @@ const HeaderTabs = () => {
 
     try {
       const newOnDuty = !onDuty;
-      setOnDuty(newOnDuty); // optimistic update
 
       if (newOnDuty) {
         // Going ON duty - request location
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
           Alert.alert("Permission Required", "Location permission is needed.");
-          setOnDuty(false); // revert to false (clearer than !newOnDuty)
           setLoading(false);
           return;
         }
@@ -42,7 +40,7 @@ const HeaderTabs = () => {
           isOnDuty: newOnDuty,
           location: {
             lat: location.coords.latitude,
-            long: location.coords.longitude,
+            lng: location.coords.longitude,
           },
         });
       } else {
@@ -53,7 +51,6 @@ const HeaderTabs = () => {
     } catch (error) {
       console.error("Error toggling duty:", error);
       Alert.alert("Error", "Failed to toggle duty status. Please try again.");
-      setOnDuty(onDuty); // revert to original state
     } finally {
       setLoading(false);
     }
