@@ -1,5 +1,5 @@
 import { useSocket } from "@/socket/context/SocketProvider";
-import { toggleOnDuty } from "@/socket/handlers/booking";
+import { toggleOnDuty, updateLocation } from "@/socket/handlers/duty";
 import { useDutyStore } from "@/store/useDutyStore";
 import { useRequestBookingStore } from "@/store/useRequestBookingStore";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,17 +7,25 @@ import { DrawerActions } from "@react-navigation/native";
 import { Image } from "expo-image";
 import * as Location from "expo-location";
 import { useNavigation } from "expo-router";
-import React, { useState } from "react";
-import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Platform,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 
 const HeaderTabs = () => {
   const navigation = useNavigation();
-  const { onDuty } = useDutyStore();
+  const onDuty = useDutyStore((state) => state.onDuty);
   const clearIncomingBookings = useRequestBookingStore(
     (s) => s.clearIncomingBooking
   );
   const socket = useSocket();
   const [loading, setLoading] = useState(false);
+  const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
 
   const toggleDuty = async () => {
     if (loading) return; // ignore repeated presses
@@ -56,20 +64,67 @@ const HeaderTabs = () => {
     }
   };
 
+  useEffect(() => {
+    const startWatching = async () => {
+      try {
+        const { status } = await Location.getForegroundPermissionsAsync();
+        if (status !== "granted") {
+          console.error("Location permission not granted");
+          return;
+        }
+
+        // ✅ Watch position with custom options
+        subscriptionRef.current = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.Balanced,
+            timeInterval: 30_000,
+            distanceInterval: 800,
+          },
+          (location) => {
+            const newLocation = {
+              lat: location.coords.latitude,
+              lng: location.coords.longitude,
+            };
+
+            // Send location update to backend
+            updateLocation(socket, newLocation);
+          }
+        );
+      } catch (error) {
+        console.error("Error starting location watch:", error);
+      }
+    };
+
+    if (onDuty) {
+      startWatching();
+    }
+
+    return () => {
+      if (subscriptionRef.current) {
+        subscriptionRef.current.remove();
+        subscriptionRef.current = null;
+      }
+    };
+  }, [onDuty, socket]);
+
   return (
     <View className="flex-row items-center justify-between w-full">
       <View className="flex-row items-center gap-4">
         <Pressable
           onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
         >
-          <Ionicons name="menu" size={28} color="#FFA840" />
+          <Ionicons
+            name="menu"
+            size={Platform.OS === "ios" ? 34 : 28}
+            color="#FFA840"
+          />
         </Pressable>
 
         {/* Duty toggle */}
         <Pressable
           onPress={toggleDuty}
           disabled={loading}
-          className={`flex-row items-center justify-center gap-2 px-3 w-28 py-2 rounded-full ${onDuty ? "bg-white border border-lightPrimary" : "bg-gray-200"}`}
+          className={`flex-row items-center justify-center gap-2 px-3 w-28 py-2 rounded-full h-10 active:scale-105 ${onDuty ? "bg-white border border-lightPrimary" : "bg-gray-200"}`}
         >
           {loading ? (
             <ActivityIndicator size="small" color="#FFA840" />

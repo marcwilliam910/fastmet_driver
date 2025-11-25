@@ -1,6 +1,9 @@
+import { useSocket } from "@/socket/context/SocketProvider";
+import { acceptBooking } from "@/socket/handlers/booking";
+import { useActiveBookingStore } from "@/store/useActiveBooking";
 import { useDutyStore } from "@/store/useDutyStore";
 import { useRequestBookingStore } from "@/store/useRequestBookingStore";
-import { Services } from "@/types/booking";
+import { Booking, Services } from "@/types/booking";
 import { formatDate } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -10,21 +13,50 @@ import Popover, { PopoverPlacement } from "react-native-popover-view";
 import SeeMoreModal from "../modals/seeMoreModal";
 
 export default function Regular() {
-  const [selectedFilters, setSelectedFilters] = useState(["ASAP", "Schedule"]);
+  const [selectedFilters, setSelectedFilters] = useState(["ASAP", "SCHEDULE"]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [selectedRequest, setSelectedRequest] = useState<Booking | null>(null);
   const incomingBooking = useRequestBookingStore(
     (state) => state.incomingBooking
   );
   const onDuty = useDutyStore((state) => state.onDuty);
+  const setActiveBooking = useActiveBookingStore(
+    (state) => state.setActiveBooking
+  );
+  const socket = useSocket();
 
   const regularBookings = useMemo(() => {
     return incomingBooking.filter((b) => b.bookingType.type !== "pooling");
   }, [incomingBooking]);
 
+  const filteredBookings = useMemo(() => {
+    return regularBookings.filter((b) =>
+      selectedFilters.includes(b.bookingType.type.toUpperCase())
+    );
+  }, [regularBookings, selectedFilters]);
+
   const handleSeeMorePress = (request: any) => {
     setSelectedRequest(request);
     setModalVisible(true);
+  };
+
+  const handleAcceptBooking = () => {
+    if (!selectedRequest) return;
+    setActiveBooking(selectedRequest);
+
+    const payload = {
+      bookingId: selectedRequest._id,
+      driverData: {
+        id: "123",
+        name: "Test Driver",
+        rating: 4.5,
+      },
+    };
+
+    setModalVisible(false);
+
+    acceptBooking(socket, payload);
+    router.push("/(root_screen)/booking/pickup");
   };
 
   const handleFilterPress = (filter: string) => {
@@ -74,7 +106,7 @@ export default function Regular() {
                   <View className="px-2 py-2 bg-lightPrimary ">
                     <Text className="text-lg font-bold text-white">Filter</Text>
                   </View>
-                  {["ASAP", "Schedule"].map((option) => (
+                  {["ASAP", "SCHEDULE"].map((option) => (
                     <Pressable
                       onPress={() => handleFilterPress(option)}
                       key={option}
@@ -96,7 +128,7 @@ export default function Regular() {
             </View>
 
             <FlatList
-              data={regularBookings}
+              data={filteredBookings}
               renderItem={({ item }) => (
                 <Card
                   pickup={item.pickUp.address}
@@ -115,6 +147,18 @@ export default function Regular() {
                 paddingBottom: 40,
                 gap: 15,
               }}
+              ListEmptyComponent={() => (
+                <View className="flex-1 items-center justify-center px-6 py-12">
+                  <Ionicons name="cube-outline" size={60} color="#9CA3AF" />
+                  <Text className="text-xl font-semibold text-gray-800 mt-4 text-center">
+                    No Active Requests
+                  </Text>
+                  <Text className="text-gray-500 mt-2 text-center">
+                    There are currently no delivery or pickup requests assigned
+                    to you.
+                  </Text>
+                </View>
+              )}
             />
           </View>
 
@@ -123,7 +167,7 @@ export default function Regular() {
               visible={modalVisible}
               onClose={() => setModalVisible(false)}
               data={selectedRequest}
-              onPress={() => router.push("/(root_screen)/booking/pickup")}
+              onPress={handleAcceptBooking}
               isAccepted={false}
             />
           )}
@@ -158,29 +202,29 @@ export const Card = ({
   onPressSeeMore,
 }: CardProps) => {
   return (
-    <Pressable
-      onPress={onPressSeeMore}
-      className="overflow-hidden bg-white rounded-2xl active:opacity-80"
+    <View
       style={{
         shadowColor: "#000",
-        shadowOffset: {
-          width: 0,
-          height: 4,
-        },
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
         elevation: 8, // for Android
       }}
+      className="rounded-2xl"
     >
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-5 py-3 bg-lightPrimary">
-        <Text className="text-lg font-semibold text-white">
-          {" "}
-          {bookingType.type === "schedule"
-            ? `Schedule: ${formatDate(bookingType.value || "")}`
-            : bookingType.value}
-        </Text>
-        {/* <Pressable
+      <Pressable
+        onPress={onPressSeeMore}
+        className="overflow-hidden bg-white rounded-2xl active:opacity-80"
+      >
+        {/* Header */}
+        <View className="flex-row items-center justify-between px-5 py-3 bg-lightPrimary">
+          <Text className="text-lg font-semibold text-white">
+            {" "}
+            {bookingType.type === "schedule"
+              ? `Schedule: ${formatDate(bookingType.value || "")}`
+              : bookingType.value}
+          </Text>
+          {/* <Pressable
           className="flex-row items-center gap-2 active:scale-105"
         //   onPress={() => router.push("/(root_screens)/booking/viewOnMap")}
         >
@@ -189,70 +233,73 @@ export const Card = ({
           </Text>
           <Ionicons name="arrow-forward" size={16} color="white" />
         </Pressable> */}
-      </View>
+        </View>
 
-      {/* Body */}
-      <View className="gap-5 px-4 py-5 ">
-        {/* Pickup & Drop */}
-        <View className="relative flex-row items-center justify-between ml-5 mr-2 border-l border-dashed pl-7">
-          <View className="gap-4">
-            <Text className="font-medium max-w-52" numberOfLines={2}>
-              {pickup}
+        {/* Body */}
+        <View className="gap-5 px-4 py-5 ">
+          {/* Pickup & Drop */}
+          <View className="relative flex-row items-center justify-between ml-5 mr-2 border-l border-dashed pl-7">
+            <View className="gap-4">
+              <Text className="font-medium max-w-52" numberOfLines={2}>
+                {pickup}
+              </Text>
+              <Text className="font-medium max-w-52" numberOfLines={2}>
+                {dropoff}
+              </Text>
+            </View>
+            <Text className="font-bold">{distance.toFixed(1)}km</Text>
+
+            <Ionicons
+              name="location-sharp"
+              size={24}
+              className="absolute -left-3.5 -top-1 bg-white"
+            />
+            <Ionicons
+              name="locate-sharp"
+              size={24}
+              className="absolute -left-3.5 -bottom-1 bg-white"
+            />
+          </View>
+
+          {/* services adds on emojis*/}
+          <View className="gap-2">
+            <Text className="font-semibold text-gray-600">
+              Services adds on:
             </Text>
-            <Text className="font-medium max-w-52" numberOfLines={2}>
-              {dropoff}
+            <View className="flex-row flex-wrap items-center gap-2 px-2">
+              {services.map((service, index) => (
+                <View
+                  key={index}
+                  className="items-center justify-center p-1 border border-gray-400 rounded-md size-10"
+                >
+                  <Text className="text-lg">{service.icon}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Payment */}
+          <View className="flex-row items-center justify-between p-4 bg-gray-100 rounded-lg">
+            <Text className="text-base text-gray-600">
+              {isCash ? "Cash Payment" : "Online Payment"}
+            </Text>
+            <Text className="text-lg font-semibold text-darkPrimary">
+              Php{" "}
+              {amount.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </Text>
           </View>
-          <Text className="font-bold">{distance.toFixed(1)}km</Text>
 
-          <Ionicons
-            name="location-sharp"
-            size={24}
-            className="absolute -left-3.5 -top-1 bg-white"
-          />
-          <Ionicons
-            name="locate-sharp"
-            size={24}
-            className="absolute -left-3.5 -bottom-1 bg-white"
-          />
+          <Pressable
+            className="items-center justify-center active:scale-105"
+            onPress={onPressSeeMore}
+          >
+            <Text className="text-sm font-medium">+ See more</Text>
+          </Pressable>
         </View>
-
-        {/* services adds on emojis*/}
-        <View className="gap-2">
-          <Text className="font-semibold text-gray-600">Services adds on:</Text>
-          <View className="flex-row flex-wrap items-center gap-2 px-2">
-            {services.map((service, index) => (
-              <View
-                key={index}
-                className="items-center justify-center p-1 border border-gray-400 rounded-md size-10"
-              >
-                <Text className="text-lg">{service.icon}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Payment */}
-        <View className="flex-row items-center justify-between p-4 bg-gray-100 rounded-lg">
-          <Text className="text-base text-gray-600">
-            {isCash ? "Cash Payment" : "Online Payment"}
-          </Text>
-          <Text className="text-lg font-semibold text-darkPrimary">
-            Php{" "}
-            {amount.toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </Text>
-        </View>
-
-        <Pressable
-          className="items-center justify-center active:scale-105"
-          onPress={onPressSeeMore}
-        >
-          <Text className="text-sm font-medium">+ See more</Text>
-        </Pressable>
-      </View>
-    </Pressable>
+      </Pressable>
+    </View>
   );
 };

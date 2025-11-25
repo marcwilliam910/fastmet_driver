@@ -3,7 +3,7 @@ import { formatDate } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function SeeMoreModal({
   visible,
@@ -18,6 +18,8 @@ export default function SeeMoreModal({
   onPress: () => void;
   isAccepted: boolean;
 }) {
+  const insets = useSafeAreaInsets();
+
   if (!data) return null;
 
   const totalServicesPrice = data.addedServices.reduce(
@@ -33,7 +35,14 @@ export default function SeeMoreModal({
       onRequestClose={onClose}
       statusBarTranslucent={true} // Add this for Android
     >
-      <SafeAreaView className="flex-1 bg-white">
+      <View
+        style={{
+          flex: 1,
+          paddingTop: insets.top, // respect status bar / notch
+          paddingBottom: insets.bottom,
+          backgroundColor: "white",
+        }}
+      >
         {/* Header */}
         <View className="flex-row items-center justify-center px-4 pt-2 pb-4">
           <Pressable onPress={onClose} className="absolute left-4 top-1">
@@ -230,7 +239,7 @@ export default function SeeMoreModal({
             </Pressable>
           )}
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 }

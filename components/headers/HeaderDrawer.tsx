@@ -1,16 +1,16 @@
-import {Ionicons} from "@expo/vector-icons";
-import {DrawerActions, useNavigation} from "@react-navigation/native";
-import {Pressable, Text, View} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { DrawerActions, useNavigation } from "@react-navigation/native";
+import { Platform, Pressable, Text, View } from "react-native";
 
-const HeaderDrawer = ({title}: {title: string}) => {
+const HeaderDrawer = ({ title }: { title: string }) => {
   const navigation = useNavigation();
 
   // Map titles to icons
   const iconMap: Record<string, string> = {
-    "Home": "home",
+    Home: "home",
     "My Profile": "person",
-    "Notification": "notifications",
-    "Settings": "settings",
+    Notification: "notifications",
+    Settings: "settings",
     "Switch Rider": "car",
   };
 
@@ -22,7 +22,11 @@ const HeaderDrawer = ({title}: {title: string}) => {
       <Pressable
         onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
       >
-        <Ionicons name="menu" size={28} color="#FFA840" />
+        <Ionicons
+          name="menu"
+          size={Platform.OS === "ios" ? 34 : 28}
+          color="#FFA840"
+        />
       </Pressable>
 
       {/* Center: Icon + Title */}

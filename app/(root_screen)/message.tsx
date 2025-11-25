@@ -117,15 +117,18 @@ const Message = () => {
           <View className="flex-1 px-2 bg-white rounded-2xl">
             <TextInput
               placeholder="Type a message..."
+              placeholderTextColor="#9FABB4"
               value={text}
               onChangeText={setText}
               multiline
+              className="text-base py-3"
               style={{
                 maxHeight: 120,
-                textAlignVertical: "center", // keep text centered
+                textAlignVertical: "top", // recommended for chat inputs
               }}
             />
           </View>
+
           <View className="flex-row items-center gap-3 h-11">
             {/* Emoji */}
             <Pressable>
@@ -192,13 +195,17 @@ const Message = () => {
               ? "height"
               : undefined
         }
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0} // Adjust this offset for iOS
+        keyboardVerticalOffset={0} // Adjust this offset for iOS
       >
         {/* Custom Header */}
         <View className="flex-row items-center justify-between px-4 py-3 bg-secondary">
-          <View className="flex-row items-center flex-1 gap-5">
-            <Pressable onPress={() => router.back()}>
-              <Ionicons name="chevron-back" size={24} color="#FFA840" />
+          <View className="flex-row items-center flex-1 gap-2">
+            <Pressable onPress={() => router.back()} className="p-2">
+              <Ionicons
+                name="chevron-back"
+                size={Platform.OS === "ios" ? 30 : 24}
+                color="#FFA840"
+              />
             </Pressable>
 
             <Image
@@ -209,7 +216,7 @@ const Message = () => {
 
             <View className="flex-1">
               <Text className="text-base font-bold text-white">
-                Driver&apos;s Name
+                Client&apos;s Name
               </Text>
               <View className="flex-row items-center gap-1">
                 <View className="w-2 h-2 bg-green-500 rounded-full" />

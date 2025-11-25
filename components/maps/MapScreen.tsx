@@ -1,3 +1,4 @@
+import { useActiveBookingStore } from "@/store/useActiveBooking";
 import {
   MANEUVER_MAP,
   MAPBOX_PUBLIC_KEY,
@@ -6,10 +7,12 @@ import {
 import { formatDistance, formatInstruction, formatTime } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
 import MapboxGL, { UserTrackingMode } from "@rnmapbox/maps";
+// import { Image } from "expo-image";
+import { Image } from "expo-image";
 import * as Location from "expo-location";
 import { computeDestinationPoint } from "geolib";
 import { useEffect, useRef, useState } from "react";
-import { Alert, Image, Pressable, StatusBar, Text, View } from "react-native";
+import { Alert, Pressable, StatusBar, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 MapboxGL.setAccessToken(MAPBOX_PUBLIC_KEY);
@@ -20,9 +23,6 @@ type ManeuverInfo = {
   distanceMeters: number;
   maneuver: string;
 };
-
-const pickUp = { coords: { lat: 14.84593, lng: 120.81167 } };
-const dropOff = { coords: { lat: 14.82827, lng: 120.73592 } };
 
 export default function MapboxDriverMap() {
   const mapRef = useRef<MapboxGL.MapView>(null);
@@ -40,6 +40,11 @@ export default function MapboxDriverMap() {
   const [allSteps, setAllSteps] = useState<any[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+
+  const activeBooking = useActiveBookingStore((s) => s.activeBooking);
+
+  const pickUp = activeBooking?.pickUp || { coords: { lat: 0, lng: 0 } };
+  const dropOff = activeBooking?.dropOff || { coords: { lat: 0, lng: 0 } };
 
   const insets = useSafeAreaInsets();
 
@@ -221,8 +226,8 @@ export default function MapboxDriverMap() {
       const subscription = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
-          timeInterval: 2000,
-          distanceInterval: 5,
+          timeInterval: 3000,
+          distanceInterval: 20,
         },
         (loc) => {
           setDriverLocation(loc.coords);
@@ -288,10 +293,14 @@ export default function MapboxDriverMap() {
   }
 
   const MarkerImage = ({ source }: { source: any }) => (
-    <Image
-      source={source}
-      style={{ width: 40, height: 40, resizeMode: "contain" }}
-    />
+    <View style={{ width: 40, height: 40 }}>
+      <Image
+        source={source}
+        style={{ width: "100%", height: "100%" }}
+        contentFit="contain"
+        contentPosition="center"
+      />
+    </View>
   );
 
   return (
@@ -312,7 +321,7 @@ export default function MapboxDriverMap() {
           ref={cameraRef}
           followUserLocation={isDriving}
           followUserMode={UserTrackingMode.FollowWithCourse}
-          centerCoordinate={[pickUp.coords.lng, pickUp.coords.lat]} // default on mount
+          centerCoordinate={[pickUp.coords.lng, pickUp.coords.lat]}
           zoomLevel={isDriving ? 17.5 : 16.5}
           pitch={isDriving ? 65 : 0}
         />
@@ -325,7 +334,58 @@ export default function MapboxDriverMap() {
           images={{ navigationArrow: STATIC_IMAGES.currentLoc }}
         />
 
-        {driverLocation && (
+        {/* Pick up marker */}
+        <MapboxGL.PointAnnotation
+          id="pickup"
+          coordinate={[pickUp.coords.lng, pickUp.coords.lat]}
+        >
+          <MarkerImage source={STATIC_IMAGES.pickup} />
+        </MapboxGL.PointAnnotation>
+
+        {/* Drop off marker */}
+        <MapboxGL.PointAnnotation
+          id="dropoff"
+          coordinate={[dropOff.coords.lng, dropOff.coords.lat]}
+        >
+          <MarkerImage source={STATIC_IMAGES.dropoff} />
+        </MapboxGL.PointAnnotation>
+
+        {/* ROUTE - Render FIRST (base layer) */}
+        {routeCoords.length > 0 && (
+          <MapboxGL.ShapeSource
+            id="routeSource"
+            shape={{
+              type: "Feature",
+              geometry: { type: "LineString", coordinates: routeCoords },
+              properties: {},
+            }}
+          >
+            <MapboxGL.LineLayer
+              id="routeOutline"
+              style={{
+                lineWidth: 8,
+                lineColor: "#FFFFFF",
+                lineJoin: "round",
+                lineCap: "round",
+                lineOpacity: 0.5,
+              }}
+            />
+            <MapboxGL.LineLayer
+              id="routeLine"
+              style={{
+                lineWidth: 6,
+                lineColor: "#034efc",
+                lineJoin: "round",
+                lineCap: "round",
+                lineOpacity: 0.9,
+              }}
+            />
+          </MapboxGL.ShapeSource>
+        )}
+
+        {/* DRIVER ARROW - Render SECOND (dependent layer) */}
+        {/* Only show if route exists AND driver location exists */}
+        {routeCoords.length > 0 && driverLocation && (
           <MapboxGL.ShapeSource
             id="driverLocationSource"
             shape={{
@@ -344,7 +404,6 @@ export default function MapboxDriverMap() {
               id="driverArrow"
               aboveLayerID="routeLine"
               style={{
-                // Step 2: Reference the image by its key/ID instead of using require().
                 iconImage: "navigationArrow",
                 iconSize: 0.4,
                 iconRotate: driverLocation.heading ?? 0,
@@ -356,60 +415,14 @@ export default function MapboxDriverMap() {
             />
           </MapboxGL.ShapeSource>
         )}
-
-        {/* pick up */}
-        <MapboxGL.PointAnnotation
-          id="pickup"
-          coordinate={[pickUp.coords.lng, pickUp.coords.lat]}
-        >
-          <MarkerImage source={STATIC_IMAGES.pickup} />
-        </MapboxGL.PointAnnotation>
-
-        {/* drop off */}
-        <MapboxGL.PointAnnotation
-          id="dropoff"
-          coordinate={[dropOff.coords.lng, dropOff.coords.lat]}
-        >
-          <MarkerImage source={STATIC_IMAGES.dropoff} />
-        </MapboxGL.PointAnnotation>
-
-        {routeCoords.length > 0 && (
-          <MapboxGL.ShapeSource
-            id="routeSource"
-            shape={{
-              type: "Feature",
-              geometry: { type: "LineString", coordinates: routeCoords },
-              properties: {},
-            }}
-          >
-            <MapboxGL.LineLayer
-              id="routeLine"
-              style={{
-                lineWidth: 6,
-                lineColor: "#034efc",
-                lineJoin: "round",
-                lineCap: "round",
-                lineOpacity: 0.9,
-              }}
-            />
-            <MapboxGL.LineLayer
-              id="routeOutline"
-              style={{
-                lineWidth: 8,
-                lineColor: "#FFFFFF",
-                lineJoin: "round",
-                lineCap: "round",
-                lineOpacity: 0.5,
-              }}
-              belowLayerID="routeLine"
-            />
-          </MapboxGL.ShapeSource>
-        )}
       </MapboxGL.MapView>
 
       {/* Enhanced instruction card */}
       {instruction && (
-        <View className="absolute top-8 left-4 right-4 z-10">
+        <View
+          className="absolute left-4 right-4 z-10"
+          style={{ top: insets.top }}
+        >
           <View className="bg-white rounded-3xl overflow-hidden">
             {/* Top info bar */}
             <View className="bg-lightPrimary px-5 py-3 flex-row justify-between items-center">

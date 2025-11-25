@@ -1,7 +1,7 @@
 import Carousel from "@/components/Carousel";
-import {Ionicons} from "@expo/vector-icons";
-import React, {useMemo} from "react";
-import {ScrollView, Text, View} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useMemo } from "react";
+import { ScrollView, Text, View } from "react-native";
 
 const Home = () => {
   const date = useMemo(() => {
@@ -16,7 +16,7 @@ const Home = () => {
   return (
     <ScrollView
       className="relative flex-1 bg-white"
-      contentContainerStyle={{paddingBottom: 100}}
+      contentContainerStyle={{ paddingBottom: 100 }}
       showsVerticalScrollIndicator={false}
     >
       <Carousel />

@@ -11,21 +11,32 @@ export default {
     ios: {
       bundleIdentifier: "com.guildsman.fastmetdriver",
       supportsTablet: true,
-      config: {
-        googleMapsApiKey: process.env.EXPO_PUBLIC_IOS_MAP_KEY,
-      },
+      // config: {
+      //   googleMapsApiKey: process.env.EXPO_PUBLIC_IOS_MAP_KEY,
+      // },
       infoPlist: {
         NSLocationWhenInUseUsageDescription:
           "We need your location to show navigation.",
+        // ADD THESE:
+        NSLocationAlwaysUsageDescription:
+          "We need your location in the background to track your delivery route.",
+        NSLocationAlwaysAndWhenInUseUsageDescription:
+          "We need your location to show navigation and track deliveries.",
+        NSPhotoLibraryUsageDescription:
+          "We need access to your photos to upload pictures.",
+        NSCameraUsageDescription:
+          "We need camera access to take photos for deliveries.",
+        // For background location (since you use expo-task-manager):
+        UIBackgroundModes: ["location"],
       },
     },
     android: {
       package: "com.guildsman.fastmetdriver",
-      config: {
-        googleMaps: {
-          apiKey: process.env.EXPO_PUBLIC_ANDROID_MAP_KEY,
-        },
-      },
+      // config: {
+      //   googleMaps: {
+      //     apiKey: process.env.EXPO_PUBLIC_ANDROID_MAP_KEY,
+      //   },
+      // },
       adaptiveIcon: {
         foregroundImage: "./assets/fastmet/icon.png",
         backgroundColor: "#ffffff",

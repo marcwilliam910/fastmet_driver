@@ -2,7 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React from "react";
-import { FlatList, Pressable, Text, TextInput, View } from "react-native";
+import {
+  FlatList,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 const DUMMYMESSAGES = [
   {
@@ -82,9 +89,22 @@ const DUMMYMESSAGES = [
 const Chats = () => {
   return (
     <View className="flex-1 gap-6 py-6 bg-white">
-      <View className="flex-row items-center px-4 py-1 mx-4 rounded-full bg-ctaSecondary">
-        <TextInput placeholder="Search..." className="flex-1" />
-        <Ionicons name="search" size={24} color="#9FABB4" />
+      <View
+        className="flex-row items-center bg-ctaSecondary mx-4 px-4 rounded-full"
+        style={{
+          height: Platform.OS === "ios" ? 54 : 46,
+        }}
+      >
+        <TextInput
+          placeholder="Search..."
+          placeholderTextColor="#9FABB4"
+          className="flex-1 text-base leading-[18px]"
+        />
+        <Ionicons
+          name="search"
+          size={Platform.OS === "ios" ? 24 : 20}
+          color="#9FABB4"
+        />
       </View>
 
       <View>

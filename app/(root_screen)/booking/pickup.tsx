@@ -1,21 +1,23 @@
 import MapScreen from "@/components/maps/MapScreen";
 import ExitMapModal from "@/components/modals/exitMapModal";
 import SeeMoreModal from "@/components/modals/seeMoreModal";
-import { DUMMY } from "@/components/request_tabs/Regular";
 import SwipeArriveButton from "@/components/SwipeArriveButton";
+import { useActiveBookingStore } from "@/store/useActiveBooking";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { BackHandler, Pressable, StatusBar, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export const isInRadius = false;
+const isInRadius = false;
 
 export default function PickUp() {
   const [showExitModal, setShowExitModal] = useState(false);
 
   const [isSeeMoreModalVisible, setIsSeeMoreModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
+
+  const activeBooking = useActiveBookingStore((s) => s.activeBooking);
 
   useEffect(() => {
     const backAction = () => {
@@ -80,13 +82,15 @@ export default function PickUp() {
         </View>
       </View>
 
-      <SeeMoreModal
-        visible={isSeeMoreModalVisible}
-        onClose={() => setIsSeeMoreModalVisible(false)}
-        data={DUMMY[0]}
-        onPress={() => {}}
-        isAccepted={true}
-      />
+      {activeBooking && (
+        <SeeMoreModal
+          visible={isSeeMoreModalVisible}
+          onClose={() => setIsSeeMoreModalVisible(false)}
+          data={activeBooking}
+          onPress={() => {}}
+          isAccepted={true}
+        />
+      )}
 
       <ExitMapModal
         visible={showExitModal}

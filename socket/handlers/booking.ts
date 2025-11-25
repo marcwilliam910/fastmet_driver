@@ -1,23 +1,8 @@
-import { useDutyStore } from "@/store/useDutyStore";
 import { useRequestBookingStore } from "@/store/useRequestBookingStore";
 import { Booking } from "@/types/booking";
 import { truncate } from "@/utils/format";
 import Toast from "react-native-toast-message";
 import { Socket } from "socket.io-client";
-
-export const toggleOnDuty = (
-  socket: Socket,
-  data: { isOnDuty: boolean; location?: { lat: number; lng: number } }
-) => {
-  socket.emit("toggleDuty", data);
-};
-
-export const dutyStatusChanged = (socket: Socket) => {
-  socket.on("dutyStatusChanged", (data: { isOnDuty: boolean }) => {
-    // ✅ Access store directly without hooks
-    useDutyStore.getState().setOnDuty(data.isOnDuty);
-  });
-};
 
 export const receiveBookingRequest = (socket: Socket) => {
   socket.on("new_booking_request", (booking: Booking) => {
@@ -33,5 +18,21 @@ export const receiveBookingRequest = (socket: Socket) => {
       swipeable: true,
       topOffset: 50,
     });
+  });
+};
+
+export const acceptBooking = (
+  socket: Socket,
+  payload: {
+    bookingId: string;
+    driverData: { id: string; name: string; rating: number };
+  }
+) => {
+  socket.emit("acceptBooking", payload);
+};
+
+export const pendingBookingsUpdated = (socket: Socket) => {
+  socket.on("pendingBookingsUpdated", (data: { bookings: Booking[] }) => {
+    useRequestBookingStore.getState().setIncomingBooking(data.bookings);
   });
 };

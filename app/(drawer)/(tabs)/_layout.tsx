@@ -61,9 +61,9 @@ export default function TabLayout() {
                 size={24}
                 color={color}
               />
-              <View className="absolute flex items-center justify-center bg-red-500 rounded-full size-4 -top-1 -right-2">
+              {/* <View className="absolute flex items-center justify-center bg-red-500 rounded-full size-4 -top-1 -right-2">
                 <Text className="text-xs font-semibold text-white">4</Text>
-              </View>
+              </View> */}
             </View>
           ),
         }}
@@ -82,7 +82,7 @@ export default function TabLayout() {
               {incomingBooking.length > 0 && (
                 <View className="absolute flex items-center justify-center bg-red-500 rounded-full size-4 -top-1 -right-2">
                   <Text className="text-xs font-semibold text-white">
-                    {incomingBooking.length}
+                    {incomingBooking.length > 9 ? "9+" : incomingBooking.length}
                   </Text>
                 </View>
               )}

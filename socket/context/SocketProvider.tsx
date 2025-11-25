@@ -1,7 +1,10 @@
-import { useRequestBookings } from "@/queries/bookingQueries";
 import { useDutyStore } from "@/store/useDutyStore";
 import React, { createContext, useContext, useEffect } from "react";
-import { dutyStatusChanged, receiveBookingRequest } from "../handlers/booking";
+import {
+  pendingBookingsUpdated,
+  receiveBookingRequest,
+} from "../handlers/booking";
+import { dutyStatusChanged } from "../handlers/duty";
 import { getSocket } from "../socket";
 
 interface SocketContextType {
@@ -16,10 +19,10 @@ export default function SocketProvider({
   children: React.ReactNode;
 }) {
   const socket = getSocket("driverId", "driver", "token");
-  const onDuty = useDutyStore((state) => state.onDuty); // ✅ Totally fine!
+  const onDuty = useDutyStore((state) => state.onDuty);
 
   // Activate the query - it will fetch when onDuty becomes true
-  useRequestBookings();
+  // useRequestBookings();
 
   // connection
   useEffect(() => {
@@ -38,12 +41,12 @@ export default function SocketProvider({
   useEffect(() => {
     if (onDuty) {
       receiveBookingRequest(socket);
-    } else {
-      socket.off("new_booking_request");
+      pendingBookingsUpdated(socket);
     }
 
     return () => {
       socket.off("new_booking_request");
+      socket.off("pendingBookingsUpdated");
     };
   }, [onDuty, socket]);
 
