@@ -1,4 +1,4 @@
-import { useActiveBookingStore } from "@/store/useActiveBooking";
+import { useAppStore } from "@/store/useAppStore";
 import {
   MANEUVER_MAP,
   MAPBOX_PUBLIC_KEY,
@@ -41,7 +41,7 @@ export default function MapboxDriverMap() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
-  const activeBooking = useActiveBookingStore((s) => s.activeBooking);
+  const activeBooking = useAppStore((s) => s.activeBooking);
 
   const pickUp = activeBooking?.pickUp || { coords: { lat: 0, lng: 0 } };
   const dropOff = activeBooking?.dropOff || { coords: { lat: 0, lng: 0 } };

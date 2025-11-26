@@ -1,7 +1,6 @@
 import { useSocket } from "@/socket/context/SocketProvider";
 import { toggleOnDuty, updateLocation } from "@/socket/handlers/duty";
-import { useDutyStore } from "@/store/useDutyStore";
-import { useRequestBookingStore } from "@/store/useRequestBookingStore";
+import { useAppStore } from "@/store/useAppStore";
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { Image } from "expo-image";
@@ -19,10 +18,8 @@ import {
 
 const HeaderTabs = () => {
   const navigation = useNavigation();
-  const onDuty = useDutyStore((state) => state.onDuty);
-  const clearIncomingBookings = useRequestBookingStore(
-    (s) => s.clearIncomingBooking
-  );
+  const onDuty = useAppStore((state) => state.onDuty);
+  const clearIncomingBookings = useAppStore((s) => s.clearIncomingBooking);
   const socket = useSocket();
   const [loading, setLoading] = useState(false);
   const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
@@ -112,6 +109,7 @@ const HeaderTabs = () => {
       <View className="flex-row items-center gap-4">
         <Pressable
           onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+          hitSlop={{ top: 20, left: 20, bottom: 20, right: 20 }}
         >
           <Ionicons
             name="menu"

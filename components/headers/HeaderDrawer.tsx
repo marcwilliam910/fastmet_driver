@@ -17,10 +17,12 @@ const HeaderDrawer = ({ title }: { title: string }) => {
   const iconName = iconMap[title] || "document-outline"; // fallback icon
 
   return (
-    <View className="flex-row items-center justify-between w-full">
+    <View className="flex-row items-center justify-center">
       {/* Left: Hamburger Menu */}
       <Pressable
+        className="absolute top-0 left-0"
         onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+        hitSlop={{ top: 20, left: 20, bottom: 20, right: 20 }}
       >
         <Ionicons
           name="menu"
@@ -30,7 +32,7 @@ const HeaderDrawer = ({ title }: { title: string }) => {
       </Pressable>
 
       {/* Center: Icon + Title */}
-      <View className="absolute left-0 right-0 flex-row items-center justify-center gap-2">
+      <View className="flex-row w-full items-center justify-center gap-2">
         <Ionicons
           name={iconName as keyof typeof Ionicons.glyphMap}
           size={24}
@@ -38,9 +40,6 @@ const HeaderDrawer = ({ title }: { title: string }) => {
         />
         <Text className="text-lg font-bold text-white">{title}</Text>
       </View>
-
-      {/* Right: Empty spacer to balance layout */}
-      <View className="w-7" />
     </View>
   );
 };

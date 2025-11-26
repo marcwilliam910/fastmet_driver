@@ -1,10 +1,10 @@
-import { useRequestBookingStore } from "@/store/useRequestBookingStore";
+import { useAppStore } from "@/store/useAppStore";
 import React, { useMemo } from "react";
 import { FlatList, View } from "react-native";
 import { Card } from "./Regular";
 
 export default function Pooling() {
-  const incomingBooking = useRequestBookingStore((s) => s.incomingBooking);
+  const incomingBooking = useAppStore((s) => s.incomingBooking);
 
   const poolingBookings = useMemo(() => {
     return incomingBooking.filter((b) => b.bookingType.type === "pooling");

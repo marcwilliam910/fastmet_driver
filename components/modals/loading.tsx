@@ -1,4 +1,4 @@
-import { useLoadingStore } from "@/store/useLoadingStore";
+import { useAppStore } from "@/store/useAppStore";
 import { Image } from "expo-image";
 import { cssInterop } from "nativewind";
 import React, { useEffect, useRef } from "react";
@@ -7,7 +7,7 @@ import { Animated, Easing, Modal, View } from "react-native";
 const AnimatedView = cssInterop(Animated.View, { className: "style" });
 
 export default function LoadingModal() {
-  const loading = useLoadingStore((state) => state.isLoading);
+  const loading = useAppStore((state) => state.isLoading);
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0)).current;
 

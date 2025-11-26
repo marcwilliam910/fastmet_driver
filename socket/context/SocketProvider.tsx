@@ -1,4 +1,4 @@
-import { useDutyStore } from "@/store/useDutyStore";
+import { useAppStore } from "@/store/useAppStore";
 import React, { createContext, useContext, useEffect } from "react";
 import {
   bookingTaken,
@@ -20,7 +20,7 @@ export default function SocketProvider({
   children: React.ReactNode;
 }) {
   const socket = getSocket("driverId", "driver", "token");
-  const onDuty = useDutyStore((state) => state.onDuty);
+  const onDuty = useAppStore((state) => state.onDuty);
 
   // Activate the query - it will fetch when onDuty becomes true
   // useRequestBookings();

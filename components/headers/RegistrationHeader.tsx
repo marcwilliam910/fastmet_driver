@@ -1,7 +1,7 @@
-import {Ionicons} from "@expo/vector-icons";
-import {router} from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React from "react";
-import {Pressable, Text, View} from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
 
 const RegistrationHeader = ({
   text,
@@ -19,8 +19,13 @@ const RegistrationHeader = ({
         <Pressable
           className="absolute top-5 left-5"
           onPress={() => router.back()}
+          hitSlop={{ top: 20, left: 20, bottom: 20, right: 20 }}
         >
-          <Ionicons name="chevron-back" size={25} color="#FFA840" />
+          <Ionicons
+            name="chevron-back"
+            size={Platform.OS === "ios" ? 34 : 28}
+            color="#FFA840"
+          />
         </Pressable>
       )}
     </View>

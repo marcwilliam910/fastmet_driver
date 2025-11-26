@@ -1,14 +1,18 @@
 import { Booking } from "@/types/booking";
-import { create } from "zustand";
+import { StateCreator } from "zustand";
 
-interface ActiveBookingState {
+export interface ActiveBookingSlice {
   activeBooking: Booking | null;
   setActiveBooking: (b: Booking | null) => void;
   clearActiveBooking: () => void;
 }
 
-export const useActiveBookingStore = create<ActiveBookingState>((set) => ({
+export const createActiveBookingSlice: StateCreator<ActiveBookingSlice> = (
+  set
+) => ({
   activeBooking: null,
+
   setActiveBooking: (b) => set({ activeBooking: b }),
+
   clearActiveBooking: () => set({ activeBooking: null }),
-}));
+});

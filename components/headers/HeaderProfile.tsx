@@ -10,6 +10,7 @@ const HeaderProfile = ({ title }: { title: string }) => {
       <Pressable
         onPress={() => router.back()}
         className={`absolute ${Platform.OS === "ios" ? "-top-2 -left-2" : "-top-1 left-0"}`}
+        hitSlop={{ top: 20, left: 20, bottom: 20, right: 20 }}
       >
         <Ionicons
           name="chevron-back"

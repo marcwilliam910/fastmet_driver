@@ -1,5 +1,5 @@
 import { useSocket } from "@/socket/context/SocketProvider";
-import { useLoadingStore } from "@/store/useLoadingStore";
+import { useAppStore } from "@/store/useAppStore";
 import { Booking } from "@/types/booking";
 import { formatDate } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,7 +26,7 @@ export default function SeeMoreModal({
 }) {
   const insets = useSafeAreaInsets();
   const socket = useSocket();
-  const setLoading = useLoadingStore((state) => state.setLoading);
+  const setLoading = useAppStore((state) => state.setLoading);
 
   // for confirm booking
   useEffect(() => {

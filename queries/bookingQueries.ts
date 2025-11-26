@@ -1,12 +1,11 @@
 import { fetchPendingBookings } from "@/api/book";
-import { useDutyStore } from "@/store/useDutyStore";
-import { useRequestBookingStore } from "@/store/useRequestBookingStore";
+import { useAppStore } from "@/store/useAppStore";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 
 // TODO: DELETE
 export const useRequestBookings = () => {
-  const isOnDuty = useDutyStore((state) => state.onDuty);
+  const isOnDuty = useAppStore((state) => state.onDuty);
   const wasOnDuty = useRef(false);
 
   const query = useQuery({
@@ -25,7 +24,7 @@ export const useRequestBookings = () => {
 
   useEffect(() => {
     if (query.data && query.dataUpdatedAt) {
-      useRequestBookingStore.getState().setIncomingBooking(query.data);
+      useAppStore.getState().setIncomingBooking(query.data);
     }
   }, [query.data, query.dataUpdatedAt]);
 

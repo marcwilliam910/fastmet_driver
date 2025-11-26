@@ -1,12 +1,12 @@
 import HeaderTabs from "@/components/headers/HeaderTabs";
-import { useRequestBookingStore } from "@/store/useRequestBookingStore";
+import { useAppStore } from "@/store/useAppStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { Text, View } from "react-native";
 
 export default function TabLayout() {
-  const incomingBooking = useRequestBookingStore(
-    (state) => state.incomingBooking
+  const incomingBookingCount = useAppStore(
+    (state) => state.incomingBooking.length
   );
   return (
     <Tabs
@@ -79,10 +79,10 @@ export default function TabLayout() {
                 size={24}
                 color={color}
               />
-              {incomingBooking.length > 0 && (
+              {incomingBookingCount > 0 && (
                 <View className="absolute flex items-center justify-center bg-red-500 rounded-full size-4 -top-1 -right-2">
                   <Text className="text-xs font-semibold text-white">
-                    {incomingBooking.length > 9 ? "9+" : incomingBooking.length}
+                    {incomingBookingCount > 9 ? "9+" : incomingBookingCount}
                   </Text>
                 </View>
               )}

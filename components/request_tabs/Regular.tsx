@@ -1,9 +1,6 @@
 import { useSocket } from "@/socket/context/SocketProvider";
 import { acceptBooking } from "@/socket/handlers/booking";
-import { useActiveBookingStore } from "@/store/useActiveBooking";
-import { useDutyStore } from "@/store/useDutyStore";
-import { useLoadingStore } from "@/store/useLoadingStore";
-import { useRequestBookingStore } from "@/store/useRequestBookingStore";
+import { useAppStore } from "@/store/useAppStore";
 import { Booking, Services } from "@/types/booking";
 import { formatDate } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,15 +12,11 @@ import SeeMoreModal from "../modals/seeMoreModal";
 export default function Regular() {
   const [selectedFilters, setSelectedFilters] = useState(["ASAP", "SCHEDULE"]);
   const [modalVisible, setModalVisible] = useState(false);
-  const setLoading = useLoadingStore((state) => state.setLoading);
+  const setLoading = useAppStore((state) => state.setLoading);
   const [selectedRequest, setSelectedRequest] = useState<Booking | null>(null);
-  const incomingBooking = useRequestBookingStore(
-    (state) => state.incomingBooking
-  );
-  const onDuty = useDutyStore((state) => state.onDuty);
-  const setActiveBooking = useActiveBookingStore(
-    (state) => state.setActiveBooking
-  );
+  const incomingBooking = useAppStore((state) => state.incomingBooking);
+  const onDuty = useAppStore((state) => state.onDuty);
+  const setActiveBooking = useAppStore((state) => state.setActiveBooking);
   const socket = useSocket();
 
   const regularBookings = useMemo(() => {

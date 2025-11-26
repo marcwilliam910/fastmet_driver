@@ -2,7 +2,7 @@ import MapScreen from "@/components/maps/MapScreen";
 import ExitMapModal from "@/components/modals/exitMapModal";
 import SeeMoreModal from "@/components/modals/seeMoreModal";
 import SwipeArriveButton from "@/components/SwipeArriveButton";
-import { useActiveBookingStore } from "@/store/useActiveBooking";
+import { useAppStore } from "@/store/useAppStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -17,7 +17,7 @@ export default function PickUp() {
   const [isSeeMoreModalVisible, setIsSeeMoreModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
 
-  const activeBooking = useActiveBookingStore((s) => s.activeBooking);
+  const activeBooking = useAppStore((s) => s.activeBooking);
 
   useEffect(() => {
     const backAction = () => {

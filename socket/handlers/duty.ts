@@ -1,5 +1,4 @@
-import { useDutyStore } from "@/store/useDutyStore";
-import { useRequestBookingStore } from "@/store/useRequestBookingStore";
+import { useAppStore } from "@/store/useAppStore";
 import { Booking } from "@/types/booking";
 import { Socket } from "socket.io-client";
 
@@ -15,12 +14,10 @@ export const dutyStatusChanged = (socket: Socket) => {
     "dutyStatusChanged",
     (data: { isOnDuty: boolean; pendingBookings?: Booking[] }) => {
       // ✅ Access store directly without hooks
-      useDutyStore.getState().setOnDuty(data.isOnDuty);
+      useAppStore.getState().setOnDuty(data.isOnDuty);
 
       if (data.pendingBookings && data.isOnDuty) {
-        useRequestBookingStore
-          .getState()
-          .setIncomingBooking(data.pendingBookings);
+        useAppStore.getState().setIncomingBooking(data.pendingBookings);
       }
     }
   );

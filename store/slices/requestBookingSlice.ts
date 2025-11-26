@@ -1,7 +1,7 @@
 import { Booking } from "@/types/booking";
-import { create } from "zustand";
+import { StateCreator } from "zustand";
 
-interface RequestBookingState {
+export interface RequestBookingSlice {
   incomingBooking: Booking[];
   addIncomingBooking: (b: Booking) => void;
   setIncomingBooking: (b: Booking[]) => void;
@@ -9,7 +9,9 @@ interface RequestBookingState {
   clearIncomingBooking: () => void;
 }
 
-export const useRequestBookingStore = create<RequestBookingState>((set) => ({
+export const createRequestBookingSlice: StateCreator<RequestBookingSlice> = (
+  set
+) => ({
   incomingBooking: [],
   addIncomingBooking: (b) =>
     set((state) => ({ incomingBooking: [b, ...state.incomingBooking] })),
@@ -19,4 +21,4 @@ export const useRequestBookingStore = create<RequestBookingState>((set) => ({
       incomingBooking: state.incomingBooking.filter((i) => i._id !== bookingId),
     })),
   clearIncomingBooking: () => set({ incomingBooking: [] }),
-}));
+});
