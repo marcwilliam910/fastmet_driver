@@ -1,13 +1,13 @@
 import HeaderDrawer from "@/components/headers/HeaderDrawer";
-import {Ionicons} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import {
   DrawerContentScrollView,
   DrawerItemList,
 } from "@react-navigation/drawer";
-import {Image} from "expo-image";
-import {Drawer} from "expo-router/drawer";
-import {Pressable, Text, View} from "react-native";
-import {useSafeAreaInsets} from "react-native-safe-area-context";
+import { Image } from "expo-image";
+import { Drawer } from "expo-router/drawer";
+import { Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CustomDrawerContent = (props: any) => {
   const inset = useSafeAreaInsets();
@@ -18,7 +18,7 @@ const CustomDrawerContent = (props: any) => {
         <View className="flex-row items-center justify-center w-full gap-1 pr-5 mb-2">
           <Image
             source={require("@/assets/fastmet/logo.png")}
-            style={{width: 40, height: 60}}
+            style={{ width: 40, height: 60 }}
             contentFit="contain"
           />
           <Text className="text-lg font-bold tracking-widest text-white">
@@ -36,7 +36,7 @@ const CustomDrawerContent = (props: any) => {
       </DrawerContentScrollView>
 
       {/* Footer */}
-      <View style={{marginBottom: inset.bottom + 10}}>
+      <View style={{ marginBottom: inset.bottom + 10 }}>
         <Text className="text-sm tracking-widest text-center text-gray-400">
           www.fastmet.com
         </Text>
@@ -70,9 +70,9 @@ export default function DrawerLayout() {
             borderRadius: 8,
           },
 
-          headerStyle: {backgroundColor: "#0F2535"},
+          headerStyle: { backgroundColor: "#0F2535" },
           headerLeft: () => null,
-          headerTitle: ({children}) => <HeaderDrawer title={children} />,
+          headerTitle: ({ children }) => <HeaderDrawer title={children} />,
         }}
       >
         <Drawer.Screen
@@ -80,7 +80,7 @@ export default function DrawerLayout() {
           options={{
             drawerLabel: "Home",
             title: "Home",
-            drawerIcon: ({focused}) => (
+            drawerIcon: ({ focused }) => (
               <Ionicons
                 name={focused ? "home" : "home-outline"}
                 size={24}
@@ -95,7 +95,7 @@ export default function DrawerLayout() {
             drawerLabel: "My Profile",
             title: "My Profile",
             // headerShown: true,
-            drawerIcon: ({focused}) => (
+            drawerIcon: ({ focused }) => (
               <Ionicons
                 name={focused ? "person" : "person-outline"}
                 size={24}
@@ -110,7 +110,7 @@ export default function DrawerLayout() {
             drawerLabel: "Notification",
             title: "Notification",
             headerShown: true,
-            drawerIcon: ({focused}) => (
+            drawerIcon: ({ focused }) => (
               <Ionicons
                 name={focused ? "notifications" : "notifications-outline"}
                 size={24}
@@ -125,7 +125,7 @@ export default function DrawerLayout() {
             drawerLabel: "Settings",
             title: "Settings",
             headerShown: true,
-            drawerIcon: ({focused}) => (
+            drawerIcon: ({ focused }) => (
               <Ionicons
                 name={focused ? "settings" : "settings-outline"}
                 size={24}
@@ -140,7 +140,7 @@ export default function DrawerLayout() {
             drawerLabel: "Switch Rider",
             title: "Switch Rider",
             headerShown: true,
-            drawerIcon: ({focused}) => (
+            drawerIcon: ({ focused }) => (
               <Ionicons
                 name={focused ? "car" : "car-outline"}
                 size={24}

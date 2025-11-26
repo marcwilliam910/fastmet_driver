@@ -89,6 +89,20 @@ const DUMMYMESSAGES = [
 const Chats = () => {
   return (
     <View className="flex-1 gap-6 py-6 bg-white">
+      {/* <Button
+        title="New Message"
+        onPress={() => {
+          Toast.show({
+            type: "error",
+            text1: "Oops! Booking Already Taken",
+            text2: "This booking has already been accepted by another driver.",
+            position: "top",
+            visibilityTime: 10_000,
+            swipeable: true,
+            topOffset: 50,
+          });
+        }}
+      /> */}
       <View
         className="flex-row items-center bg-ctaSecondary mx-4 px-4 rounded-full"
         style={{

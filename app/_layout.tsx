@@ -1,3 +1,4 @@
+import LoadingModal from "@/components/modals/loading";
 import { toastConfig } from "@/config/toastConfig";
 import { queryClient } from "@/lib/queryClient";
 import SocketProvider from "@/socket/context/SocketProvider";
@@ -58,6 +59,7 @@ export default function RootLayout() {
               <Stack.Screen name="(root_screen)" />
             </Stack>
             <Toast config={toastConfig} />
+            <LoadingModal />
           </SocketProvider>
         </QueryClientProvider>
         <StatusBar backgroundColor="#0F2535" barStyle="light-content" />

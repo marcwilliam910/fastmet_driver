@@ -82,7 +82,6 @@ const Message = () => {
 
   const addImage = async () => {
     const editedPhotoUri = await takePhotoAndAddText();
-
     // Check if the photo was successfully captured and edited
     if (!editedPhotoUri) {
       return; // Exit if user canceled or something went wrong

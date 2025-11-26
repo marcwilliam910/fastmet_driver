@@ -2,11 +2,11 @@ import { useSocket } from "@/socket/context/SocketProvider";
 import { acceptBooking } from "@/socket/handlers/booking";
 import { useActiveBookingStore } from "@/store/useActiveBooking";
 import { useDutyStore } from "@/store/useDutyStore";
+import { useLoadingStore } from "@/store/useLoadingStore";
 import { useRequestBookingStore } from "@/store/useRequestBookingStore";
 import { Booking, Services } from "@/types/booking";
 import { formatDate } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 import Popover, { PopoverPlacement } from "react-native-popover-view";
@@ -15,6 +15,7 @@ import SeeMoreModal from "../modals/seeMoreModal";
 export default function Regular() {
   const [selectedFilters, setSelectedFilters] = useState(["ASAP", "SCHEDULE"]);
   const [modalVisible, setModalVisible] = useState(false);
+  const setLoading = useLoadingStore((state) => state.setLoading);
   const [selectedRequest, setSelectedRequest] = useState<Booking | null>(null);
   const incomingBooking = useRequestBookingStore(
     (state) => state.incomingBooking
@@ -52,11 +53,8 @@ export default function Regular() {
         rating: 4.5,
       },
     };
-
-    setModalVisible(false);
-
+    setLoading(true);
     acceptBooking(socket, payload);
-    router.push("/(root_screen)/booking/pickup");
   };
 
   const handleFilterPress = (filter: string) => {
@@ -165,6 +163,7 @@ export default function Regular() {
           {selectedRequest && (
             <SeeMoreModal
               visible={modalVisible}
+              setModalVisible={setModalVisible}
               onClose={() => setModalVisible(false)}
               data={selectedRequest}
               onPress={handleAcceptBooking}

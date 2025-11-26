@@ -1,6 +1,7 @@
 import { useDutyStore } from "@/store/useDutyStore";
 import React, { createContext, useContext, useEffect } from "react";
 import {
+  bookingTaken,
   pendingBookingsUpdated,
   receiveBookingRequest,
 } from "../handlers/booking";
@@ -42,11 +43,13 @@ export default function SocketProvider({
     if (onDuty) {
       receiveBookingRequest(socket);
       pendingBookingsUpdated(socket);
+      bookingTaken(socket);
     }
 
     return () => {
       socket.off("new_booking_request");
       socket.off("pendingBookingsUpdated");
+      socket.off("bookingTaken");
     };
   }, [onDuty, socket]);
 

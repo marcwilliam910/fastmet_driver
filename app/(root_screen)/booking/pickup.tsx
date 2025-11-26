@@ -95,7 +95,7 @@ export default function PickUp() {
       <ExitMapModal
         visible={showExitModal}
         onCancel={() => setShowExitModal(false)}
-        onConfirm={() => router.back()}
+        onConfirm={() => router.replace("/(drawer)/(tabs)/booking")}
       />
 
       <StatusBar hidden />

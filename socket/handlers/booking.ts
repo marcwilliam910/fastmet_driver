@@ -14,7 +14,7 @@ export const receiveBookingRequest = (socket: Socket) => {
       text1: "New Booking Request",
       text2: `${truncate(booking.pickUp.address, 15)}  ➜  ${truncate(booking.dropOff.address, 15)}`,
       position: "top",
-      visibilityTime: 7000,
+      visibilityTime: 10_000,
       swipeable: true,
       topOffset: 50,
     });
@@ -34,5 +34,11 @@ export const acceptBooking = (
 export const pendingBookingsUpdated = (socket: Socket) => {
   socket.on("pendingBookingsUpdated", (data: { bookings: Booking[] }) => {
     useRequestBookingStore.getState().setIncomingBooking(data.bookings);
+  });
+};
+
+export const bookingTaken = (socket: Socket) => {
+  socket.on("bookingTaken", ({ bookingId }: { bookingId: string }) => {
+    useRequestBookingStore.getState().removeIncomingBooking(bookingId);
   });
 };

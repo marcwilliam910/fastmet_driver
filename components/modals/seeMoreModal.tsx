@@ -1,24 +1,75 @@
+import { useSocket } from "@/socket/context/SocketProvider";
+import { useLoadingStore } from "@/store/useLoadingStore";
 import { Booking } from "@/types/booking";
 import { formatDate } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import { router } from "expo-router";
+import React, { useEffect } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 export default function SeeMoreModal({
   visible,
+  setModalVisible = () => {},
   onClose,
   data,
   onPress,
   isAccepted,
 }: {
   visible: boolean;
+  setModalVisible?: React.Dispatch<React.SetStateAction<boolean>>;
   onClose: () => void;
   data: Booking;
   onPress: () => void;
   isAccepted: boolean;
 }) {
   const insets = useSafeAreaInsets();
+  const socket = useSocket();
+  const setLoading = useLoadingStore((state) => state.setLoading);
+
+  // for confirm booking
+  useEffect(() => {
+    const onConfirmed = ({ bookingId }: { bookingId: string }) => {
+      console.log("✔ Booking accepted:", bookingId);
+      setModalVisible(false);
+      router.push("/(root_screen)/booking/pickup");
+      setLoading(false);
+    };
+
+    if (!isAccepted) socket.on("acceptanceConfirmed", onConfirmed);
+
+    return () => {
+      if (!isAccepted) socket.off("acceptanceConfirmed", onConfirmed);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAccepted, setLoading, setModalVisible]);
+
+  // for error booking
+  useEffect(() => {
+    const onAcceptError = (data: { message: string }) => {
+      console.log("❌ ACCEPT BOOKING FAILED:", data.message);
+      setLoading(false);
+
+      Toast.show({
+        type: "error",
+        text1: "Oops! Booking Already Taken",
+        text2: data.message,
+        position: "top",
+        visibilityTime: 10_000,
+        swipeable: true,
+        topOffset: 50,
+      });
+      router.replace("/(drawer)/(tabs)/request");
+    };
+
+    if (!isAccepted) socket.on("acceptBookingError", onAcceptError);
+
+    return () => {
+      if (!isAccepted) socket.off("acceptBookingError", onAcceptError);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAccepted, setLoading]);
 
   if (!data) return null;
 
@@ -96,7 +147,7 @@ export default function SeeMoreModal({
             <View className="flex-row items-center justify-between p-3 mt-4 bg-white rounded-lg">
               <Text className="text-sm text-gray-600">Distance</Text>
               <Text className="text-lg font-bold text-lightPrimary">
-                {data.routeData.distance}km
+                {data.routeData.distance.toFixed(2)}km
               </Text>
             </View>
 
