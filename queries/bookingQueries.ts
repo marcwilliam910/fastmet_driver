@@ -1,4 +1,4 @@
-import { fetchPendingBookings } from "@/api/book";
+import { fetchActiveBookings, fetchPendingBookings } from "@/api/book";
 import { useAppStore } from "@/store/useAppStore";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
@@ -33,4 +33,11 @@ export const useRequestBookings = () => {
       console.error("Failed to fetch pending bookings:", query.error);
     }
   }, [query.error]);
+};
+
+export const useActiveBookings = (driverId: string) => {
+  return useQuery({
+    queryKey: ["activeBookings"],
+    queryFn: () => fetchActiveBookings(driverId),
+  });
 };

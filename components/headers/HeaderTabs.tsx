@@ -15,16 +15,32 @@ import {
   Text,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 const HeaderTabs = () => {
   const navigation = useNavigation();
   const onDuty = useAppStore((state) => state.onDuty);
   const clearIncomingBookings = useAppStore((s) => s.clearIncomingBooking);
+  const activeBooking = useAppStore((s) => s.activeBooking);
   const socket = useSocket();
   const [loading, setLoading] = useState(false);
   const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
 
   const toggleDuty = async () => {
+    if (activeBooking && onDuty) {
+      // show error warning saying you have active booking, if you off duty there will be consequences or something
+      Toast.show({
+        type: "error",
+        text1: "You have an active booking",
+        text2: "Please complete your active booking before going off duty",
+        position: "top",
+        visibilityTime: 7_000,
+        swipeable: true,
+        topOffset: 50,
+      });
+      return;
+    }
+
     if (loading) return; // ignore repeated presses
     setLoading(true);
 

@@ -36,6 +36,10 @@ export type Booking = {
   images: string[];
 };
 
+export type ActiveBooking = Booking & {
+  driver: { id: string; name: string; rating: number };
+};
+
 export type Services = {
   id: string;
   name: string;

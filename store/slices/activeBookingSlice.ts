@@ -11,8 +11,6 @@ export const createActiveBookingSlice: StateCreator<ActiveBookingSlice> = (
   set
 ) => ({
   activeBooking: null,
-
   setActiveBooking: (b) => set({ activeBooking: b }),
-
   clearActiveBooking: () => set({ activeBooking: null }),
 });

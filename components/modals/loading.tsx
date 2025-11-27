@@ -48,6 +48,7 @@ export default function LoadingModal() {
       animationType="fade"
       visible={loading}
       statusBarTranslucent
+      onRequestClose={() => {}}
     >
       <View className="items-center justify-center flex-1 bg-black/50">
         <AnimatedView

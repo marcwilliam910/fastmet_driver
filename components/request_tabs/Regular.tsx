@@ -63,7 +63,11 @@ export default function Regular() {
       {regularBookings.length === 0 ? (
         <View className="bg-white flex-1 px-8 py-12">
           <View className="items-center">
-            <Ionicons name="alert-circle-outline" size={80} color="#9CA3AF" />
+            <Ionicons
+              name="information-circle-outline"
+              size={80}
+              color="#9CA3AF"
+            />
 
             <Text className="text-2xl font-bold text-gray-800 mt-6 text-center">
               No Incoming Requests
@@ -211,7 +215,6 @@ export const Card = ({
         {/* Header */}
         <View className="flex-row items-center justify-between px-5 py-3 bg-lightPrimary">
           <Text className="text-lg font-semibold text-white">
-            {" "}
             {bookingType.type === "schedule"
               ? `Schedule: ${formatDate(bookingType.value || "")}`
               : bookingType.value}
