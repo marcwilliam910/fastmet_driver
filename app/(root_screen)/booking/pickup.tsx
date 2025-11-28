@@ -1,15 +1,13 @@
+import MapButtonsWrapper from "@/components/MapButtons";
 import MapScreen from "@/components/maps/MapScreen";
 import ExitMapModal from "@/components/modals/exitMapModal";
 import SeeMoreModal from "@/components/modals/seeMoreModal";
-import SwipeArriveButton from "@/components/SwipeArriveButton";
 import { useAppStore } from "@/store/useAppStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { BackHandler, Pressable, StatusBar, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const isInRadius = false;
 
 export default function PickUp() {
   const [showExitModal, setShowExitModal] = useState(false);
@@ -51,13 +49,10 @@ export default function PickUp() {
           bottom: 0,
         }}
       >
-        {isInRadius && (
-          <View className={`w-full px-2`}>
-            <SwipeArriveButton onSwipe={() => {}} />
-          </View>
-        )}
+        <MapButtonsWrapper />
+
         <View
-          className="flex-row justify-evenly items-center px-5 py-3 w-full bg-white z-30"
+          className="flex-row justify-evenly items-center px-5 py-3 w-full bg-white z-30 rounded-tr-3xl "
           style={{ paddingBottom: insets.bottom + 5 }}
         >
           <View className="items-center justify-center gap-1">

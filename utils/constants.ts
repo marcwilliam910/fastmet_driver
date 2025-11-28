@@ -30,3 +30,5 @@ export const MANEUVER_MAP: Record<string, string> = {
   arrive: "Arrive",
   depart: "Start",
 };
+
+export const MAX_LOCATION_RADIUS_KM = 1; //1KM

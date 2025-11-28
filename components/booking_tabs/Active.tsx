@@ -57,33 +57,35 @@ export default function Active() {
           </View>
         </View>
       ) : (
-        <FlatList
-          data={activeBookings}
-          renderItem={({ item }) => (
-            <Card
-              pickup={item.pickUp.address}
-              dropoff={item.dropOff.address}
-              distance={item.routeData.distance}
-              amount={item.routeData.price}
-              isCash={item.paymentMethod === "cash"}
-              bookingType={item.bookingType}
-              onPress={() => {
-                useAppStore.getState().setActiveBooking(item);
-                router.push("/(root_screen)/booking/pickup");
-              }}
-            />
-          )}
-          keyExtractor={(item) => item._id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingBottom: 40,
-            gap: 15,
-            paddingHorizontal: 20,
-            paddingTop: 10,
-          }}
-          refreshing={isPending}
-          onRefresh={refetch}
-        />
+        <View className="flex-1 bg-white">
+          <FlatList
+            data={activeBookings}
+            renderItem={({ item }) => (
+              <Card
+                pickup={item.pickUp.address}
+                dropoff={item.dropOff.address}
+                distance={item.routeData.distance}
+                amount={item.routeData.price}
+                isCash={item.paymentMethod === "cash"}
+                bookingType={item.bookingType}
+                onPress={() => {
+                  useAppStore.getState().setActiveBooking(item);
+                  router.push("/(root_screen)/booking/pickup");
+                }}
+              />
+            )}
+            keyExtractor={(item) => item._id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingBottom: 40,
+              gap: 15,
+              paddingHorizontal: 20,
+              paddingTop: 10,
+            }}
+            refreshing={isPending}
+            onRefresh={refetch}
+          />
+        </View>
       )}
     </>
   );

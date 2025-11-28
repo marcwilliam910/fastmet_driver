@@ -8,7 +8,6 @@ import { formatDistance, formatInstruction, formatTime } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
 import MapboxGL, { UserTrackingMode } from "@rnmapbox/maps";
 // import { Image } from "expo-image";
-import { Image } from "expo-image";
 import * as Location from "expo-location";
 import { computeDestinationPoint } from "geolib";
 import { useEffect, useRef, useState } from "react";
@@ -30,9 +29,11 @@ export default function MapboxDriverMap() {
   const locationSubscription = useRef<Location.LocationSubscription | null>(
     null
   );
-  const [driverLocation, setDriverLocation] =
-    useState<Location.LocationObjectCoords | null>(null);
-  const [isDriving, setIsDriving] = useState(false);
+  const setDriverLocation = useAppStore((s) => s.setDriverLocation);
+  const driverLocation = useAppStore((s) => s.driverLocation);
+  const isDriving = useAppStore((s) => s.isDriving);
+  const setIsDriving = useAppStore((s) => s.setIsDriving);
+
   const [routeCoords, setRouteCoords] = useState<number[][]>([]);
   const [instruction, setInstruction] = useState<ManeuverInfo | null>(null);
   const [totalDistance, setTotalDistance] = useState<string | null>(null);
@@ -40,6 +41,9 @@ export default function MapboxDriverMap() {
   const [allSteps, setAllSteps] = useState<any[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedMarker, setSelectedMarker] = useState<
+    "pickup" | "dropoff" | null
+  >(null);
 
   const activeBooking = useAppStore((s) => s.activeBooking);
 
@@ -95,7 +99,11 @@ export default function MapboxDriverMap() {
         accuracy: Location.Accuracy.High,
       });
 
-      setDriverLocation(loc.coords);
+      setDriverLocation({
+        lat: loc.coords.latitude,
+        lng: loc.coords.longitude,
+        heading: loc.coords.heading ?? 0,
+      });
 
       await fetchRouteSteps(
         loc.coords.latitude,
@@ -209,7 +217,11 @@ export default function MapboxDriverMap() {
         accuracy: Location.Accuracy.High,
       });
 
-      setDriverLocation(loc.coords);
+      setDriverLocation({
+        lat: loc.coords.latitude,
+        lng: loc.coords.longitude,
+        heading: loc.coords.heading ?? 0,
+      });
 
       await fetchRouteSteps(
         loc.coords.latitude,
@@ -230,8 +242,11 @@ export default function MapboxDriverMap() {
           distanceInterval: 20,
         },
         (loc) => {
-          setDriverLocation(loc.coords);
-
+          setDriverLocation({
+            lat: loc.coords.latitude,
+            lng: loc.coords.longitude,
+            heading: loc.coords.heading ?? 0,
+          });
           if (isDriving) {
             animateCamera(
               loc.coords.latitude,
@@ -292,17 +307,6 @@ export default function MapboxDriverMap() {
     }
   }
 
-  const MarkerImage = ({ source }: { source: any }) => (
-    <View style={{ width: 40, height: 40 }}>
-      <Image
-        source={source}
-        style={{ width: "100%", height: "100%" }}
-        contentFit="contain"
-        contentPosition="center"
-      />
-    </View>
-  );
-
   return (
     <View className="flex-1">
       <StatusBar hidden />
@@ -317,6 +321,15 @@ export default function MapboxDriverMap() {
         attributionEnabled={false}
         scaleBarEnabled={false}
       >
+        {/* Custom Images */}
+        <MapboxGL.Images
+          images={{
+            navigationArrow: STATIC_IMAGES.currentLoc,
+            pickupMarker: STATIC_IMAGES.pickup,
+            dropoffMarker: STATIC_IMAGES.dropoff,
+          }}
+        />
+
         <MapboxGL.Camera
           ref={cameraRef}
           followUserLocation={isDriving}
@@ -325,30 +338,73 @@ export default function MapboxDriverMap() {
           zoomLevel={isDriving ? 17.5 : 16.5}
           pitch={isDriving ? 65 : 0}
         />
-
-        {/* Hide default user location */}
         <MapboxGL.UserLocation visible={false} />
 
-        {/* Custom driver location arrow */}
-        <MapboxGL.Images
-          images={{ navigationArrow: STATIC_IMAGES.currentLoc }}
-        />
-
-        {/* Pick up marker */}
-        <MapboxGL.PointAnnotation
-          id="pickup"
-          coordinate={[pickUp.coords.lng, pickUp.coords.lat]}
+        {/* PICKUP MARKER */}
+        <MapboxGL.ShapeSource
+          id="pickupSource"
+          shape={{
+            properties: {
+              title: "Pick Up",
+            },
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [pickUp.coords.lng, pickUp.coords.lat],
+            },
+          }}
+          onPress={() => setSelectedMarker("pickup")}
         >
-          <MarkerImage source={STATIC_IMAGES.pickup} />
-        </MapboxGL.PointAnnotation>
+          <MapboxGL.SymbolLayer
+            id="pickupSymbol"
+            style={{
+              iconImage: "pickupMarker",
+              iconSize: 0.4,
+              iconAllowOverlap: true,
+              iconIgnorePlacement: true,
+              textField: selectedMarker === "pickup" ? ["get", "title"] : "",
+              textOffset: [0, 1.5], // moves the text above the icon
+              textAnchor: "top",
+              textSize: 14,
+              textColor: "#000",
+              textFont: ["Open Sans Bold"], // font weight
+              textAllowOverlap: true,
+            }}
+          />
+        </MapboxGL.ShapeSource>
 
-        {/* Drop off marker */}
-        <MapboxGL.PointAnnotation
-          id="dropoff"
-          coordinate={[dropOff.coords.lng, dropOff.coords.lat]}
+        {/* DROPOFF MARKER */}
+        <MapboxGL.ShapeSource
+          id="dropoffSource"
+          shape={{
+            properties: {
+              title: "Drop Off",
+            },
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [dropOff.coords.lng, dropOff.coords.lat],
+            },
+          }}
+          onPress={() => setSelectedMarker("dropoff")}
         >
-          <MarkerImage source={STATIC_IMAGES.dropoff} />
-        </MapboxGL.PointAnnotation>
+          <MapboxGL.SymbolLayer
+            id="dropoffSymbol"
+            style={{
+              iconImage: "dropoffMarker",
+              iconSize: 0.4,
+              iconAllowOverlap: true,
+              iconIgnorePlacement: true,
+              textField: selectedMarker === "dropoff" ? ["get", "title"] : "",
+              textOffset: [0, 1.5], // moves the text above the icon
+              textAnchor: "top",
+              textSize: 14,
+              textColor: "#000",
+              textFont: ["Open Sans Bold"], // font weight
+              textAllowOverlap: true,
+            }}
+          />
+        </MapboxGL.ShapeSource>
 
         {/* ROUTE - Render FIRST (base layer) */}
         {routeCoords.length > 0 && (
@@ -392,10 +448,7 @@ export default function MapboxDriverMap() {
               type: "Feature",
               geometry: {
                 type: "Point",
-                coordinates: [
-                  driverLocation.longitude,
-                  driverLocation.latitude,
-                ],
+                coordinates: [driverLocation.lng, driverLocation.lat],
               },
               properties: {},
             }}
@@ -453,8 +506,8 @@ export default function MapboxDriverMap() {
             {/* Main instruction */}
             <View className="flex-row items-center px-5 py-6 gap-4">
               {/* Arrow icon box */}
-              <View className="bg-orange-200/70 rounded-2xl p-4 ">
-                <View className="size-8 items-center justify-center">
+              <View className="bg-orange-200/70 rounded-2xl p-3 justify-center items-center">
+                <View className="justify-center items-center">
                   {renderArrow(instruction.maneuver)}
                 </View>
               </View>
@@ -515,29 +568,6 @@ export default function MapboxDriverMap() {
               </View>
             )}
           </View>
-        </View>
-      )}
-
-      {/* Control buttons */}
-      {isDriving && (
-        <View
-          className="absolute right-2 flex-row z-20"
-          style={{
-            bottom: insets.bottom + 85,
-          }}
-        >
-          <Pressable
-            onPress={() => setIsDriving(false)}
-            disabled={isLoading}
-            className={`p-4 rounded-2xl bg-red-500 `}
-          >
-            <Ionicons
-              name="stop"
-              size={24}
-              color="white"
-              className="animate-pulse"
-            />
-          </Pressable>
         </View>
       )}
     </View>

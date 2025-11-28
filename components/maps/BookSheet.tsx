@@ -3,9 +3,9 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Dimensions, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import SwipeArriveButton from "../MapButtons";
 import SeeMoreModal from "../modals/seeMoreModal";
 import { DUMMY } from "../request_tabs/Regular";
-import SwipeArriveButton from "../SwipeArriveButton";
 import SheetButton from "./SheetButton";
 
 // NOT BEING USED
