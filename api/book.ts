@@ -1,11 +1,11 @@
 import api from "@/lib/axios";
-import { ActiveBooking, Booking } from "@/types/booking";
+import { ActiveBooking } from "@/types/booking";
 
 // TODO: DELETE
-export async function fetchPendingBookings() {
-  const res = await api.get<Booking[]>(`/booking/pending`);
-  return res.data;
-}
+// export async function fetchPendingBookings() {
+//   const res = await api.get<Booking[]>(`/booking/pending`);
+//   return res.data;
+// }
 
 export async function fetchActiveBookings(
   driverId: string

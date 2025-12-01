@@ -22,13 +22,13 @@ export default function Active() {
 
   if (isPending)
     return (
-      <View className="flex-1 items-center justify-center">
+      <View className="flex-1 items-center justify-center bg-white">
         <ActivityIndicator size="large" color="#FFA840" />
       </View>
     );
   if (error)
     return (
-      <View className="flex-1 items-center justify-center">
+      <View className="flex-1 items-center justify-center bg-white">
         <Text className="text-lg font-semibold text-gray-500">
           {error.message}
         </Text>

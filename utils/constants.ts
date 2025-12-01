@@ -8,7 +8,7 @@ export const GOOGLE_MAPS_API_KEY =
 export const STATIC_IMAGES = {
   pickup: require("@/assets/images/pickup.png"),
   dropoff: require("@/assets/images/dropoff.png"),
-  currentLoc: require("@/assets/images/navigation.png"),
+  currentLoc: require("@/assets/images/gps.png"),
 };
 
 export const MAPBOX_PUBLIC_KEY =

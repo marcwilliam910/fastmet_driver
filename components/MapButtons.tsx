@@ -11,18 +11,26 @@ export default function MapButtonsWrapper() {
   const activeBooking = useAppStore((s) => s.activeBooking);
   const isDriving = useAppStore((s) => s.isDriving);
   const setIsDriving = useAppStore((s) => s.setIsDriving);
+  const setNavigationStage = useAppStore((s) => s.setNavigationStage);
+  const navigationStage = useAppStore((s) => s.navigationStage);
 
   if (!isDriving) return null; // Do not show button unless in drive mode
   if (!driverLocation || !activeBooking) return null;
 
-  const pickupLocation = {
-    lat: activeBooking.pickUp.coords.lat,
-    lng: activeBooking.pickUp.coords.lng,
+  const location = {
+    lat:
+      navigationStage === "TO_PICKUP"
+        ? activeBooking.pickUp.coords.lat
+        : activeBooking.dropOff.coords.lat,
+    lng:
+      navigationStage === "TO_PICKUP"
+        ? activeBooking.pickUp.coords.lng
+        : activeBooking.dropOff.coords.lng,
   };
 
   const distance = calculateDistance(
     { lat: driverLocation.lat, lng: driverLocation.lng },
-    pickupLocation
+    location
   );
 
   const isInRadius = distance <= MAX_LOCATION_RADIUS_KM;
@@ -30,7 +38,13 @@ export default function MapButtonsWrapper() {
   return (
     <View className={`w-full px-2`}>
       {isInRadius ? (
-        <SwipeArriveButton onSwipe={() => setIsDriving(false)} />
+        <SwipeArriveButton
+          stage={navigationStage}
+          onSwipe={() => {
+            setIsDriving(false);
+            setNavigationStage("TO_DROPOFF");
+          }}
+        />
       ) : (
         <StopDrivingButton />
       )}
@@ -38,10 +52,16 @@ export default function MapButtonsWrapper() {
   );
 }
 
-function SwipeArriveButton({ onSwipe }: { onSwipe: () => void }) {
+function SwipeArriveButton({
+  onSwipe,
+  stage,
+}: {
+  onSwipe: () => void;
+  stage: "TO_PICKUP" | "TO_DROPOFF";
+}) {
   return (
     <SwipeButton
-      title="Arrived at location"
+      title={`Arrived at ${stage === "TO_PICKUP" ? "Pick Up" : "Drop Off"}`}
       titleStyles={{
         fontSize: 17,
         fontWeight: "700",

@@ -41,11 +41,14 @@ export default function MapboxDriverMap() {
   const [allSteps, setAllSteps] = useState<any[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedMarker, setSelectedMarker] = useState<
-    "pickup" | "dropoff" | null
-  >(null);
+  const [showNames, setShowNames] = useState({
+    pickup: false,
+    dropoff: false,
+    driver: false,
+  });
 
   const activeBooking = useAppStore((s) => s.activeBooking);
+  const navigationStage = useAppStore((s) => s.navigationStage);
 
   const pickUp = activeBooking?.pickUp || { coords: { lat: 0, lng: 0 } };
   const dropOff = activeBooking?.dropOff || { coords: { lat: 0, lng: 0 } };
@@ -222,12 +225,17 @@ export default function MapboxDriverMap() {
         lng: loc.coords.longitude,
         heading: loc.coords.heading ?? 0,
       });
+      // Determine destination based on navigation stage
+      const destination =
+        navigationStage === "TO_PICKUP"
+          ? { lat: pickUp.coords.lat, lng: pickUp.coords.lng }
+          : { lat: dropOff.coords.lat, lng: dropOff.coords.lng };
 
       await fetchRouteSteps(
         loc.coords.latitude,
         loc.coords.longitude,
-        pickUp.coords.lat,
-        pickUp.coords.lng
+        destination.lat,
+        destination.lng
       );
 
       // Clean up previous subscription
@@ -266,7 +274,7 @@ export default function MapboxDriverMap() {
     })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDriving, activeBooking]);
+  }, [isDriving, activeBooking, navigationStage]);
 
   async function fetchRouteSteps(
     originLat: number,
@@ -353,7 +361,9 @@ export default function MapboxDriverMap() {
               coordinates: [pickUp.coords.lng, pickUp.coords.lat],
             },
           }}
-          onPress={() => setSelectedMarker("pickup")}
+          onPress={() =>
+            setShowNames({ ...showNames, pickup: !showNames.pickup })
+          }
         >
           <MapboxGL.SymbolLayer
             id="pickupSymbol"
@@ -362,7 +372,7 @@ export default function MapboxDriverMap() {
               iconSize: 0.4,
               iconAllowOverlap: true,
               iconIgnorePlacement: true,
-              textField: selectedMarker === "pickup" ? ["get", "title"] : "",
+              textField: showNames.pickup ? ["get", "title"] : "",
               textOffset: [0, 1.5], // moves the text above the icon
               textAnchor: "top",
               textSize: 14,
@@ -386,7 +396,9 @@ export default function MapboxDriverMap() {
               coordinates: [dropOff.coords.lng, dropOff.coords.lat],
             },
           }}
-          onPress={() => setSelectedMarker("dropoff")}
+          onPress={() =>
+            setShowNames({ ...showNames, dropoff: !showNames.dropoff })
+          }
         >
           <MapboxGL.SymbolLayer
             id="dropoffSymbol"
@@ -395,7 +407,7 @@ export default function MapboxDriverMap() {
               iconSize: 0.4,
               iconAllowOverlap: true,
               iconIgnorePlacement: true,
-              textField: selectedMarker === "dropoff" ? ["get", "title"] : "",
+              textField: showNames.dropoff ? ["get", "title"] : "",
               textOffset: [0, 1.5], // moves the text above the icon
               textAnchor: "top",
               textSize: 14,
@@ -450,8 +462,13 @@ export default function MapboxDriverMap() {
                 type: "Point",
                 coordinates: [driverLocation.lng, driverLocation.lat],
               },
-              properties: {},
+              properties: {
+                title: "You",
+              },
             }}
+            onPress={() =>
+              setShowNames({ ...showNames, driver: !showNames.driver })
+            }
           >
             <MapboxGL.SymbolLayer
               id="driverArrow"
@@ -464,6 +481,13 @@ export default function MapboxDriverMap() {
                 iconAllowOverlap: true,
                 iconIgnorePlacement: true,
                 iconPitchAlignment: "map",
+                textField: showNames.driver ? ["get", "title"] : "",
+                textOffset: [0, 2], // moves the text above the icon
+                textAnchor: "top",
+                textSize: 14,
+                textColor: "#000",
+                textFont: ["Open Sans Bold"], // font weight
+                textAllowOverlap: true,
               }}
             />
           </MapboxGL.ShapeSource>
@@ -487,10 +511,12 @@ export default function MapboxDriverMap() {
               </View>
 
               {isDriving ? (
-                <View className="bg-green-600 rounded-full px-4 py-1.5 flex-row items-center gap-2 ">
+                <View className="bg-green-600 rounded-full px-4 py-1.5 flex-row items-center gap-2">
                   <View className="w-2 h-2 bg-white rounded-full" />
                   <Text className="text-white font-bold text-xs tracking-wide">
-                    NAVIGATING
+                    {navigationStage === "TO_PICKUP"
+                      ? "TO PICKUP"
+                      : "TO DROPOFF"}
                   </Text>
                 </View>
               ) : (

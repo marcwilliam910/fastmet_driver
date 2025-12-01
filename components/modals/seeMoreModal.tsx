@@ -238,7 +238,7 @@ export default function SeeMoreModal({
                 ))}
               </View>
 
-              <View className="flex-row items-center justify-between p-4 rounded-xl">
+              <View className="flex-row items-center justify-between px-4 pt-4 rounded-xl">
                 <Text className="text-base font-semibold text-gray-800">
                   Total
                 </Text>
