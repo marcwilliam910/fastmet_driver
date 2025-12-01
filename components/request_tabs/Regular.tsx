@@ -74,9 +74,15 @@ export default function Regular() {
             </Text>
 
             <Text className="text-base text-gray-500 text-center mt-2">
-              {onDuty
-                ? "You are on duty. New booking requests will appear here."
-                : "Switch to On Duty mode to start receiving booking requests."}
+              {onDuty ? (
+                "You are on duty. New booking requests will appear here."
+              ) : (
+                <>
+                  Switch to{" "}
+                  <Text className="font-bold text-lightPrimary"> On Duty </Text>{" "}
+                  mode to start receiving booking requests.
+                </>
+              )}
             </Text>
           </View>
         </View>

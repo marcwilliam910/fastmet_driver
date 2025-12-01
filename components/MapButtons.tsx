@@ -10,6 +10,7 @@ export default function MapButtonsWrapper() {
   const driverLocation = useAppStore((s) => s.driverLocation);
   const activeBooking = useAppStore((s) => s.activeBooking);
   const isDriving = useAppStore((s) => s.isDriving);
+  const setIsDriving = useAppStore((s) => s.setIsDriving);
 
   if (!isDriving) return null; // Do not show button unless in drive mode
   if (!driverLocation || !activeBooking) return null;
@@ -29,7 +30,7 @@ export default function MapButtonsWrapper() {
   return (
     <View className={`w-full px-2`}>
       {isInRadius ? (
-        <SwipeArriveButton onSwipe={() => {}} />
+        <SwipeArriveButton onSwipe={() => setIsDriving(false)} />
       ) : (
         <StopDrivingButton />
       )}

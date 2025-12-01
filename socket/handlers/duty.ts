@@ -10,17 +10,22 @@ export const toggleOnDuty = (
 };
 
 export const dutyStatusChanged = (socket: Socket) => {
-  socket.on(
-    "dutyStatusChanged",
-    (data: { isOnDuty: boolean; pendingBookings?: Booking[] }) => {
-      // ✅ Access store directly without hooks
-      useAppStore.getState().setOnDuty(data.isOnDuty);
+  const dutyStatusChangedHandler = (data: {
+    isOnDuty: boolean;
+    pendingBookings?: Booking[];
+  }) => {
+    // ✅ Access store directly without hooks
+    useAppStore.getState().setOnDuty(data.isOnDuty);
 
-      if (data.pendingBookings && data.isOnDuty) {
-        useAppStore.getState().setIncomingBooking(data.pendingBookings);
-      }
+    if (data.pendingBookings && data.isOnDuty) {
+      useAppStore.getState().setIncomingBooking(data.pendingBookings);
     }
-  );
+  };
+  socket.on("dutyStatusChanged", dutyStatusChangedHandler);
+
+  return () => {
+    socket.off("dutyStatusChanged", dutyStatusChangedHandler);
+  };
 };
 
 export const updateLocation = (

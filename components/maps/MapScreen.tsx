@@ -266,7 +266,7 @@ export default function MapboxDriverMap() {
     })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDriving]);
+  }, [isDriving, activeBooking]);
 
   async function fetchRouteSteps(
     originLat: number,

@@ -52,7 +52,7 @@ export default function PickUp() {
         <MapButtonsWrapper />
 
         <View
-          className="flex-row justify-evenly items-center px-5 py-3 w-full bg-white z-30 rounded-tr-3xl "
+          className="flex-row justify-evenly items-center px-5 py-3 w-full bg-white z-30 rounded-t-3xl "
           style={{ paddingBottom: insets.bottom + 5 }}
         >
           <View className="items-center justify-center gap-1">
@@ -90,7 +90,10 @@ export default function PickUp() {
       <ExitMapModal
         visible={showExitModal}
         onCancel={() => setShowExitModal(false)}
-        onConfirm={() => router.replace("/(drawer)/(tabs)/booking")}
+        onConfirm={() => {
+          useAppStore.getState().setIsDriving(false);
+          router.replace("/(drawer)/(tabs)/booking");
+        }}
       />
 
       <StatusBar hidden />

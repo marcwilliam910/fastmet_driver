@@ -4,6 +4,7 @@ import {
   bookingTaken,
   pendingBookingsUpdated,
   receiveBookingRequest,
+  sendDriverLocation,
 } from "../handlers/booking";
 import { dutyStatusChanged } from "../handlers/duty";
 import { getSocket } from "../socket";
@@ -19,37 +20,36 @@ export default function SocketProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const socket = getSocket("driverId", "driver", "token");
+  const socket = getSocket("123", "driver", "token");
   const onDuty = useAppStore((state) => state.onDuty);
-
-  // Activate the query - it will fetch when onDuty becomes true
-  // useRequestBookings();
 
   // connection
   useEffect(() => {
     socket.connect();
 
     // // Always-on listeners (like messaging)
-    dutyStatusChanged(socket);
+    const cleanupDutyStatus = dutyStatusChanged(socket);
 
     return () => {
       socket.disconnect();
-      socket.off("dutyStatusChanged");
+      cleanupDutyStatus();
     };
   }, [socket]);
 
   // Add booking listener based on onDuty
   useEffect(() => {
-    if (onDuty) {
-      receiveBookingRequest(socket);
-      pendingBookingsUpdated(socket);
-      bookingTaken(socket);
-    }
+    if (!onDuty) return;
+
+    const cleanupReceiveBooking = receiveBookingRequest(socket);
+    const cleanupPendingBookings = pendingBookingsUpdated(socket);
+    const cleanupBookingTaken = bookingTaken(socket);
+    const cleanupSendDriverLocation = sendDriverLocation(socket);
 
     return () => {
-      socket.off("new_booking_request");
-      socket.off("pendingBookingsUpdated");
-      socket.off("bookingTaken");
+      cleanupReceiveBooking();
+      cleanupPendingBookings();
+      cleanupBookingTaken();
+      cleanupSendDriverLocation();
     };
   }, [onDuty, socket]);
 

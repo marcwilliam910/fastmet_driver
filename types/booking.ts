@@ -1,5 +1,6 @@
 export type Booking = {
   _id: string;
+  userId: string;
   pickUp: {
     name: string;
     address: string;

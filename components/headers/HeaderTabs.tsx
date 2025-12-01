@@ -20,6 +20,7 @@ import Toast from "react-native-toast-message";
 const HeaderTabs = () => {
   const navigation = useNavigation();
   const onDuty = useAppStore((state) => state.onDuty);
+  const isDriving = useAppStore((state) => state.isDriving);
   const clearIncomingBookings = useAppStore((s) => s.clearIncomingBooking);
   const activeBooking = useAppStore((s) => s.activeBooking);
   const socket = useSocket();
@@ -99,8 +100,7 @@ const HeaderTabs = () => {
               lng: location.coords.longitude,
             };
 
-            // Send location update to backend
-            updateLocation(socket, newLocation);
+            updateLocation(socket, newLocation); // Send location update to backend
           }
         );
       } catch (error) {
@@ -108,7 +108,7 @@ const HeaderTabs = () => {
       }
     };
 
-    if (onDuty) {
+    if (onDuty && !isDriving) {
       startWatching();
     }
 
@@ -118,7 +118,8 @@ const HeaderTabs = () => {
         subscriptionRef.current = null;
       }
     };
-  }, [onDuty, socket]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onDuty, isDriving]);
 
   return (
     <View className="flex-row items-center justify-between w-full">

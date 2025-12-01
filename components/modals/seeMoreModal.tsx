@@ -5,7 +5,14 @@ import { formatDate } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
@@ -96,8 +103,16 @@ export default function SeeMoreModal({
       >
         {/* Header */}
         <View className="flex-row items-center justify-center px-4 pt-2 pb-4">
-          <Pressable onPress={onClose} className="absolute left-4 top-1">
-            <Ionicons name="chevron-back-outline" size={28} color="#FFA840" />
+          <Pressable
+            onPress={onClose}
+            className="absolute left-4 top-1"
+            hitSlop={{ top: 20, left: 20, bottom: 20, right: 20 }}
+          >
+            <Ionicons
+              name="chevron-back-outline"
+              size={Platform.OS === "ios" ? 34 : 28}
+              color="#FFA840"
+            />
           </Pressable>
           <Text className="text-lg font-semibold uppercase">
             {data.bookingType.type}
