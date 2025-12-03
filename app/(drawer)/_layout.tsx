@@ -1,4 +1,6 @@
 import HeaderDrawer from "@/components/headers/HeaderDrawer";
+import SocketProvider from "@/socket/context/SocketProvider";
+import { useAppStore } from "@/store/useAppStore";
 import { Ionicons } from "@expo/vector-icons";
 import {
   DrawerContentScrollView,
@@ -28,10 +30,12 @@ const CustomDrawerContent = (props: any) => {
         <DrawerItemList {...props} />
         <Pressable
           className="flex-row items-center gap-3 px-5 py-4"
-          // onPress={action}
+          onPress={() => {
+            useAppStore.getState().logout();
+          }}
         >
           <Ionicons name={"log-out-outline"} size={24} color="white" />
-          <Text className="font-semibold text-white">{"Logout"}</Text>
+          <Text className="font-semibold text-white">Logout</Text>
         </Pressable>
       </DrawerContentScrollView>
 
@@ -49,7 +53,7 @@ export default function DrawerLayout() {
   // const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   return (
-    <>
+    <SocketProvider>
       <Drawer
         drawerContent={(props) => (
           <CustomDrawerContent
@@ -151,6 +155,6 @@ export default function DrawerLayout() {
         />
       </Drawer>
       {/* <LogoutModal isOpen={showLogoutModal} setIsOpen={setShowLogoutModal} /> */}
-    </>
+    </SocketProvider>
   );
 }

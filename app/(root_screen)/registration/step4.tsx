@@ -1,17 +1,17 @@
 import CustomKeyAvoidingView from "@/components/CustomKeyAvoid";
 import RegistrationHeader from "@/components/headers/RegistrationHeader";
-import {Ionicons} from "@expo/vector-icons";
-import {router} from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React from "react";
-import {Pressable, Text, View} from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
+import { Pressable, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Step4 = () => {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <CustomKeyAvoidingView>
         {/* header */}
-        <RegistrationHeader text="Registration Step 4" haveBack={true} />
+        <RegistrationHeader text="Registration Step 4/4" haveBack={true} />
 
         <View className="flex-1 gap-6 px-6 mt-4">
           <Text className="mb-2 font-semibold text-gray-800">
@@ -41,7 +41,7 @@ const Step4 = () => {
 
 export default Step4;
 
-const Card = ({text, onPress}: {text: string; onPress: () => void}) => {
+const Card = ({ text, onPress }: { text: string; onPress: () => void }) => {
   return (
     <View className="w-[45%] gap-2 ">
       <Text className="text-sm font-medium text-center">{text}</Text>

@@ -1,7 +1,7 @@
 import LoadingModal from "@/components/modals/loading";
 import { toastConfig } from "@/config/toastConfig";
+import { useAuth } from "@/hooks/useAuth";
 import { queryClient } from "@/lib/queryClient";
-import SocketProvider from "@/socket/context/SocketProvider";
 import {
   Montserrat_400Regular,
   Montserrat_700Bold,
@@ -19,7 +19,7 @@ import "../global.css";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const isLoggedIn = true;
+  const { isLoggedIn, approvalStatus } = useAuth();
 
   const [fontsLoaded] = useFonts({
     Montserrat_400Regular,
@@ -46,21 +46,24 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <SocketProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Protected guard={!isLoggedIn}>
-                <Stack.Screen name="(auth)" />
-              </Stack.Protected>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Protected guard={!isLoggedIn}>
+              <Stack.Screen name="(auth)" />
+            </Stack.Protected>
 
-              <Stack.Protected guard={isLoggedIn}>
-                <Stack.Screen name="(drawer)" />
-              </Stack.Protected>
+            <Stack.Protected
+              guard={isLoggedIn && approvalStatus === "approved"}
+            >
+              <Stack.Screen name="(drawer)" />
+            </Stack.Protected>
 
+            <Stack.Protected guard={isLoggedIn}>
               <Stack.Screen name="(root_screen)" />
-            </Stack>
-            <Toast config={toastConfig} />
-            <LoadingModal />
-          </SocketProvider>
+            </Stack.Protected>
+            <Stack.Screen name="(public_screens)" />
+          </Stack>
+          <Toast config={toastConfig} />
+          <LoadingModal />
         </QueryClientProvider>
         <StatusBar backgroundColor="#0F2535" barStyle="light-content" />
       </SafeAreaProvider>

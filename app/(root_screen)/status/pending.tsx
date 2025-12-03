@@ -4,7 +4,7 @@ import React from "react";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const Welcome = () => {
+const PendingMessage = () => {
   return (
     <SafeAreaView className="flex-1 p-4 bg-white">
       <Image
@@ -28,22 +28,23 @@ const Welcome = () => {
           transform: [{ rotate: "180deg" }],
         }}
       />
+
       <View className="items-center justify-around flex-1">
         <LogoWithText />
+
         <Text className="text-2xl font-bold tracking-wide text-secondary">
-          Thank you for registering!
+          Your account is under review
         </Text>
 
         <View className="w-4/5 gap-3">
           <Text className="text-center text-gray-500">
-            We&apos;ve received your information.
+            Our team is currently verifying your submitted information.
           </Text>
           <Text className="text-center text-gray-500">
-            Please bear with us as we process your registration.
+            Once approved, you will be able to accept bookings and go on duty.
           </Text>
           <Text className="text-center text-gray-500">
-            We&apos;ll send you an update regarding your verification schedule
-            very soon. Thanks!
+            We’ll notify you as soon as the review is complete.
           </Text>
         </View>
       </View>
@@ -51,4 +52,4 @@ const Welcome = () => {
   );
 };
 
-export default Welcome;
+export default PendingMessage;

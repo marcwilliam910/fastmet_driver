@@ -1,5 +1,8 @@
+import { useAuth } from "@/hooks/useAuth";
 import { useAppStore } from "@/store/useAppStore";
-import React, { createContext, useContext, useEffect } from "react";
+import { DefaultEventsMap } from "@socket.io/component-emitter";
+import React, { createContext, useContext, useEffect, useMemo } from "react";
+import { Socket } from "socket.io-client";
 import {
   bookingTaken,
   pendingBookingsUpdated,
@@ -9,23 +12,29 @@ import {
 import { dutyStatusChanged } from "../handlers/duty";
 import { getSocket } from "../socket";
 
-interface SocketContextType {
-  socket: ReturnType<typeof getSocket>;
+interface SocketContextValue {
+  socket: Socket<DefaultEventsMap, DefaultEventsMap> | null;
 }
 
-const SocketContext = createContext<SocketContextType | undefined>(undefined);
+export const SocketContext = createContext<SocketContextValue>({
+  socket: null,
+});
 
 export default function SocketProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const socket = getSocket("123", "driver", "token");
+  const { token } = useAuth();
   const onDuty = useAppStore((state) => state.onDuty);
+  const socket = useMemo(() => (token ? getSocket(token) : null), [token]);
 
   // connection
   useEffect(() => {
+    if (!socket) return;
+
     socket.connect();
+    console.log("socket connected");
 
     // // Always-on listeners (like messaging)
     const cleanupDutyStatus = dutyStatusChanged(socket);
@@ -34,11 +43,11 @@ export default function SocketProvider({
       socket.disconnect();
       cleanupDutyStatus();
     };
-  }, [socket]);
+  }, [socket, token]);
 
   // Add booking listener based on onDuty
   useEffect(() => {
-    if (!onDuty) return;
+    if (!onDuty || !socket) return;
 
     const cleanupReceiveBooking = receiveBookingRequest(socket);
     const cleanupPendingBookings = pendingBookingsUpdated(socket);

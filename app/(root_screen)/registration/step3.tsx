@@ -1,16 +1,16 @@
 import CustomKeyAvoidingView from "@/components/CustomKeyAvoid";
 import RegistrationHeader from "@/components/headers/RegistrationHeader";
-import {router} from "expo-router";
+import { router } from "expo-router";
 import React from "react";
-import {Pressable, Text, View} from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
+import { Pressable, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Step3 = () => {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <CustomKeyAvoidingView>
         {/* header */}
-        <RegistrationHeader text="Registration Step 3" haveBack={true} />
+        <RegistrationHeader text="Registration Step 3/4" haveBack={true} />
         <View className="flex-1 gap-6 px-6 mt-4">
           <Text className="mb-2 font-semibold text-gray-800">
             Upload Vehicle Photo
@@ -40,7 +40,7 @@ const Step3 = () => {
 
 export default Step3;
 
-const Card = ({text, onPress}: {text: string; onPress: () => void}) => {
+const Card = ({ text, onPress }: { text: string; onPress: () => void }) => {
   return (
     <Pressable
       onPress={onPress}
