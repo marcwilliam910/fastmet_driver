@@ -4,10 +4,11 @@ export interface AuthSlice {
   phoneNumber: string;
   id?: string;
   approvalStatus?: "pending" | "approved" | "rejected";
-  isProfileComplete?: boolean;
+  registrationStep: number;
   name: string;
   email: string;
   vehicle: string;
+  license: string;
   token?: string;
 
   // Actions
@@ -22,10 +23,11 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set) => ({
   phoneNumber: "",
   id: undefined,
   approvalStatus: undefined,
-  isProfileComplete: false,
+  registrationStep: 1,
   name: "",
   email: "",
   vehicle: "",
+  license: "",
   token: undefined,
 
   setAuthData: (data) =>
@@ -39,7 +41,7 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set) => ({
       phoneNumber: "",
       id: undefined,
       approvalStatus: undefined,
-      isProfileComplete: false,
+      registrationStep: 1,
       name: "",
       email: "",
       vehicle: "",
@@ -51,7 +53,6 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set) => ({
       phoneNumber: "",
       id: undefined,
       approvalStatus: undefined,
-      isProfileComplete: false,
       name: "",
       email: "",
       vehicle: "",

@@ -55,30 +55,28 @@ export default function PhoneOTPScreen() {
     setLoading(true);
     try {
       const otpCode: string = otp.join("");
-      console.log(otpCode);
       const res = await api.post("/auth/verify-otp", {
         phoneNumber,
         otpCode,
       });
-
-      console.log(JSON.stringify(res.data, null, 2));
 
       if (res.data.success) {
         // Store everything in Zustand including status
         useAppStore.getState().setAuthData({
           token: res.data.token,
           id: res.data.driver.id,
-          isProfileComplete: res.data.driver.isProfileComplete,
+          registrationStep: res.data.driver.registrationStep,
           approvalStatus: res.data.driver.approvalStatus,
           name: res.data.driver.name,
           email: res.data.driver.email,
           vehicle: res.data.driver.vehicle,
+          license: res.data.driver.license,
         });
 
         handleVerifySuccess(
           res.data.status,
           res.data.driver.approvalStatus,
-          res.data.driver.isProfileComplete
+          res.data.driver.registrationStep
         );
       }
     } catch (error: any) {
@@ -92,22 +90,36 @@ export default function PhoneOTPScreen() {
   const handleVerifySuccess = (
     status: string,
     approvalStatus: string | null,
-    isProfileComplete: boolean
+    registrationStep: number | null
   ) => {
-    // Redirect based on status and driver state
     if (status === "existing") {
-      if (!isProfileComplete) {
-        // Profile incomplete - continue registration
-        router.replace("/(root_screen)/registration/step1");
-      } else if (approvalStatus === "pending") {
-        router.replace("/(root_screen)/status/pending");
-      } else if (approvalStatus === "rejected") {
-        console.log("called");
-        router.replace("/(root_screen)/status/rejected");
+      switch (registrationStep) {
+        case 1:
+          router.replace("/(root_screen)/registration/step1");
+          break;
+        case 2:
+          router.replace("/(root_screen)/registration/step2");
+          break;
+        case 3:
+          router.replace("/(root_screen)/registration/step3");
+          break;
+        case 4:
+          router.replace("/(root_screen)/registration/step4");
+          break;
+        case 5:
+          router.replace("/(root_screen)/registration/welcome");
+          break;
+        default:
+          if (approvalStatus === "pending") {
+            router.replace("/(root_screen)/status/pending");
+          } else if (approvalStatus === "rejected") {
+            router.replace("/(root_screen)/status/rejected");
+          } else {
+            router.replace("/(root_screen)/registration/step1");
+          }
       }
     } else {
-      // status === 'pre-registered' or 'new'
-      // Both go to profile setup (pre-registered has pre-filled data)
+      // pre-registered or new
       router.replace("/(root_screen)/registration/step1");
     }
   };
@@ -123,7 +135,7 @@ export default function PhoneOTPScreen() {
       <Text className="text-base text-gray-500 mb-10 text-center leading-6">
         Enter the 6-digit verification code sent to{" "}
         <Text className="font-semibold text-[#111] underline">
-          {useAppStore.getState().phoneNumber}
+          0{useAppStore.getState().phoneNumber}
         </Text>
       </Text>
 

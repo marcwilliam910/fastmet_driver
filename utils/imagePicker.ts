@@ -1,6 +1,9 @@
+import { apiUrl } from "@/lib/axios";
+import { useAppStore } from "@/store/useAppStore";
 import RNPhotoManipulator, {
   TextOptions,
 } from "@xtayaitak/react-native-photo-manipulator";
+import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { Alert, Image } from "react-native";
@@ -111,4 +114,37 @@ export const takePhotoAndAddText = async (): Promise<string | null> => {
   // 2. Add text overlay
   const editedPhotoUri = await addTimeAndLocationToImage(photoUri);
   return editedPhotoUri;
+};
+
+// upload to cloudinary
+export const uploadAllImages = async (
+  step: number,
+  images: { [key: string]: string }
+): Promise<{ success: boolean }> => {
+  const form = new FormData();
+
+  form.append("step", step.toString());
+
+  Object.entries(images).forEach(([key, uri]) => {
+    if (!uri) return;
+    form.append("images", {
+      uri,
+      type: "image/jpeg",
+      name: `${key}.jpg`,
+    } as any);
+    form.append("types", key); // maps to same index
+  });
+
+  const res = await axios.post(
+    `${apiUrl}/profile/documents-upload`,
+    form, // IMPORTANT: this must be the body
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${useAppStore.getState().token}`,
+      },
+    }
+  );
+
+  return res.data;
 };

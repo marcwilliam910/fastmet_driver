@@ -19,13 +19,13 @@ const Auth = () => {
   const [checked, setChecked] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const setLoading = useAppStore((s) => s.setLoading);
+  const [isValid, setIsValid] = useState(false);
 
   const handleSignIn = async () => {
     // validations
     try {
       setLoading(true);
       const res = await api.post("/auth/send-otp", { phoneNumber });
-      console.log(JSON.stringify(res.data, null, 2));
 
       if (res.data.success) {
         useAppStore.getState().setAuthData({
@@ -64,7 +64,28 @@ const Auth = () => {
                 </Text>
                 <TextInput
                   value={phoneNumber}
-                  onChangeText={setPhoneNumber}
+                  onChangeText={(value) => {
+                    // Remove all non-numeric characters
+                    let cleaned = value.replace(/[^0-9]/g, "");
+
+                    // Remove leading 0
+                    if (!cleaned.startsWith("9")) {
+                      cleaned = cleaned.substring(1);
+                    }
+
+                    // Enforce max length of 10 digits
+                    if (cleaned.length > 10) {
+                      cleaned = cleaned.slice(0, 10);
+                    }
+
+                    // Update state
+                    setPhoneNumber(cleaned);
+
+                    // Validate: must start with 9 and have 10 digits total
+                    const valid =
+                      cleaned.length === 10 && /^9\d{9}$/.test(cleaned);
+                    setIsValid(valid);
+                  }}
                   keyboardType="numeric"
                   placeholder="Enter mobile number"
                   placeholderTextColor="#9CA3AF"
@@ -102,9 +123,9 @@ const Auth = () => {
 
             {/* Button */}
             <Pressable
-              disabled={!checked}
+              disabled={!checked || !isValid}
               className={`mt-4 py-4 rounded-lg bg-lightPrimary items-center justify-center active:bg-darkPrimary ${
-                checked ? "" : "opacity-70"
+                checked && isValid ? "" : "opacity-70"
               }`}
               style={{ height: Platform.OS === "ios" ? 50 : 46 }}
               onPress={handleSignIn}
