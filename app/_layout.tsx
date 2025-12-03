@@ -51,15 +51,11 @@ export default function RootLayout() {
               <Stack.Screen name="(auth)" />
             </Stack.Protected>
 
-            <Stack.Protected
-              guard={isLoggedIn && approvalStatus === "approved"}
-            >
-              <Stack.Screen name="(drawer)" />
-            </Stack.Protected>
-
             <Stack.Protected guard={isLoggedIn}>
+              <Stack.Screen name="(drawer)" />
               <Stack.Screen name="(root_screen)" />
             </Stack.Protected>
+
             <Stack.Screen name="(public_screens)" />
           </Stack>
           <Toast config={toastConfig} />

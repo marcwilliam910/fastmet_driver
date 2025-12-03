@@ -3,7 +3,7 @@ import api from "@/lib/axios";
 import { ProfileSchema } from "@/schemas/profileSchema";
 import { useAppStore } from "@/store/useAppStore";
 import { router } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Platform, Pressable, Text, TextInput, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -27,6 +27,11 @@ const Step1 = () => {
     vehicle: "",
   });
 
+  const name = useAppStore((s) => s.name);
+  const email = useAppStore((s) => s.email);
+  const vehicle = useAppStore((s) => s.vehicle);
+  const license = useAppStore((s) => s.license);
+
   const [errors, setErrors] = useState<{
     name?: string;
     email?: string;
@@ -36,6 +41,15 @@ const Step1 = () => {
 
   const [isFocus, setIsFocus] = useState(false);
   const setLoading = useAppStore((s) => s.setLoading);
+
+  useEffect(() => {
+    setFormData({
+      name,
+      email,
+      vehicle,
+      license,
+    });
+  }, [name, email, vehicle, license]);
 
   const handleChange = (key: string, value: string) => {
     setFormData((prev) => ({

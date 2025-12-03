@@ -93,6 +93,11 @@ export default function PhoneOTPScreen() {
     registrationStep: number | null
   ) => {
     if (status === "existing") {
+      if (approvalStatus === "approved") {
+        // ✅ let layout guard handle routing to home
+        router.replace("/(drawer)/(tabs)");
+        return;
+      }
       switch (registrationStep) {
         case 1:
           router.replace("/(root_screen)/registration/step1");
