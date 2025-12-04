@@ -9,6 +9,5 @@ export const useAuth = () => {
     isLoggedIn: !!id && !!token && !!phoneNumber,
     id,
     token,
-    phoneNumber,
   };
 };

@@ -4,51 +4,39 @@ import ExitMapModal from "@/components/modals/exitMapModal";
 import SeeMoreModal from "@/components/modals/seeMoreModal";
 import { useAppStore } from "@/store/useAppStore";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useNavigation } from "expo-router";
+import { usePreventRemove } from "@react-navigation/native";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { BackHandler, Platform, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Directions() {
   const [showExitModal, setShowExitModal] = useState(false);
-  const navigation = useNavigation();
 
   const [isSeeMoreModalVisible, setIsSeeMoreModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
 
   const activeBooking = useAppStore((s) => s.activeBooking);
 
+  // 1. Prevent screen removal (for both platforms)
+  usePreventRemove(!showExitModal, () => {
+    setShowExitModal(true);
+  });
+
+  // 2. Android hardware back override
   useEffect(() => {
-    // Android hardware back button
-    const backAction = () => {
-      setShowExitModal(true);
-      return true; // Prevent default back action
-    };
+    if (Platform.OS !== "android") return;
 
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
-      backAction
+      () => {
+        setShowExitModal(true);
+        return true;
+      }
     );
 
-    // iOS swipe gesture and other navigation back actions
-    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
-      // On Android, let hardwareBackPress handle it
-      if (Platform.OS === "android") {
-        return;
-      }
-
-      // Prevent default back behavior
-      e.preventDefault();
-
-      // Show modal instead
-      setShowExitModal(true);
-    });
-
-    return () => {
-      backHandler.remove();
-      unsubscribe();
-    };
-  }, [navigation]);
+    return () => backHandler.remove();
+  }, []);
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <View className="relative flex-1">

@@ -7,10 +7,10 @@ import CustomKeyAvoidingView from "@/components/CustomKeyAvoid";
 // import {User} from "@/types/user";
 // import {openGallery} from "@/utils/imagePicker";
 // import {validateForm} from "@/utils/validateForm";
-import {Ionicons} from "@expo/vector-icons";
-import {Image} from "expo-image";
-import {router} from "expo-router";
-import React, {useRef, useState} from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { router } from "expo-router";
+import React, { useRef, useState } from "react";
 import {
   findNodeHandle,
   Pressable,
@@ -20,15 +20,9 @@ import {
   UIManager,
   View,
 } from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const EditProfile = () => {
-  // const profile = useProfileStore((state) => state.profile);
-  // const setProfile = useProfileStore((state) => state.setProfile);
-
-  // const {user} = useAuth();
-  // const {isAuthenticated} = useAuthGuard();
-
   const mnameRef = useRef<TextInput>(null);
   const lnameRef = useRef<TextInput>(null);
   const numRef = useRef<TextInput>(null);
@@ -59,7 +53,7 @@ const EditProfile = () => {
   // }, [profile]);
 
   const onFormChange = (name: string, value: string) => {
-    setForm({...form, [name]: value});
+    setForm({ ...form, [name]: value });
   };
 
   const scrollToInput = (ref: React.RefObject<TextInput>) => {
@@ -72,7 +66,7 @@ const EditProfile = () => {
             findNodeHandle(scrollRef.current) as number,
             () => {},
             (x, y) => {
-              scrollRef.current?.scrollTo({y: y, animated: true});
+              scrollRef.current?.scrollTo({ y: y, animated: true });
             }
           );
         }
@@ -117,7 +111,10 @@ const EditProfile = () => {
   // };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: "#fff"}} edges={["bottom"]}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#fff" }}
+      edges={["bottom"]}
+    >
       <CustomKeyAvoidingView ref={scrollRef}>
         <View className="gap-6 px-6 pt-6 ">
           {/* profile picture */}
@@ -128,10 +125,10 @@ const EditProfile = () => {
             <Image
               source={
                 form.profilePictureUrl
-                  ? {uri: form.profilePictureUrl}
+                  ? { uri: form.profilePictureUrl }
                   : require("@/assets/images/user.png")
               } // style={{width: 32, height: 32}}
-              style={{width: 128, height: 128, borderRadius: 999}}
+              style={{ width: 128, height: 128, borderRadius: 999 }}
               contentFit="contain"
             />
 
@@ -139,7 +136,7 @@ const EditProfile = () => {
               <Pressable
                 className="absolute p-1 bg-white rounded-full right-2 top-2"
                 onPress={() =>
-                  setForm((prev) => ({...prev, profilePictureUrl: ""}))
+                  setForm((prev) => ({ ...prev, profilePictureUrl: "" }))
                 }
               >
                 <Ionicons
@@ -155,7 +152,7 @@ const EditProfile = () => {
               className="absolute p-2 bg-white rounded-full bottom-2 right-2 "
               style={{
                 shadowColor: "#000", // color of the shadow
-                shadowOffset: {width: 0, height: 2}, // x/y offset
+                shadowOffset: { width: 0, height: 2 }, // x/y offset
                 shadowOpacity: 0.25, // opacity 0–1
                 shadowRadius: 3.84, // blur radius
                 elevation: 5, // Android only
