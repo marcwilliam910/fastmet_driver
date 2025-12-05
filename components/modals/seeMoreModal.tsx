@@ -28,7 +28,7 @@ export default function SeeMoreModal({
   setModalVisible?: React.Dispatch<React.SetStateAction<boolean>>;
   onClose: () => void;
   data: Booking;
-  onPress: () => void;
+  onPress?: () => void;
   isAccepted: boolean;
 }) {
   const insets = useSafeAreaInsets();
@@ -40,7 +40,7 @@ export default function SeeMoreModal({
     const onConfirmed = ({ bookingId }: { bookingId: string }) => {
       console.log("✔ Booking accepted:", bookingId);
       setModalVisible(false);
-      router.push("/(root_screen)/booking/pickup");
+      router.push("/(root_screen)/booking/directions");
       setLoading(false);
     };
 

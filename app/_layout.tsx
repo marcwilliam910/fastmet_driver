@@ -2,13 +2,14 @@ import LoadingModal from "@/components/modals/loading";
 import { toastConfig } from "@/config/toastConfig";
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient } from "@/lib/queryClient";
+import { useAppStore } from "@/store/useAppStore";
 import {
   Montserrat_400Regular,
   Montserrat_700Bold,
   useFonts,
 } from "@expo-google-fonts/montserrat";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { SplashScreen, Stack } from "expo-router";
+import { router, SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
 import { StatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -19,7 +20,7 @@ import "../global.css";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, hasHydrated } = useAuth();
 
   const [fontsLoaded] = useFonts({
     Montserrat_400Regular,
@@ -27,19 +28,58 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (fontsLoaded) {
-      // // bypass TS check
-      // (Text as any).defaultProps = (Text as any).defaultProps || {};
-      // (Text as any).defaultProps.style = {
-      //   fontFamily: "Montserrat_400Regular",
-      // };
+    if (!isLoggedIn || !hasHydrated || !fontsLoaded) return;
 
+    // 👇 Get state once without subscribing
+    const { approvalStatus, registrationStep } = useAppStore.getState();
+    const isApproved = approvalStatus === "approved";
+
+    // User is logged in, now route them based on their state
+    if (isApproved) {
+      router.replace("/(drawer)/(tabs)");
+    } else if (registrationStep) {
+      // Route based on registration step (like handleVerifySuccess)
+      switch (registrationStep) {
+        case 1:
+          router.replace("/(root_screen)/registration/step1");
+          break;
+        case 2:
+          router.replace("/(root_screen)/registration/step2");
+          break;
+        case 3:
+          router.replace("/(root_screen)/registration/step3");
+          break;
+        case 4:
+          router.replace("/(root_screen)/registration/step4");
+          break;
+        case 5:
+          router.replace("/(root_screen)/registration/welcome");
+          break;
+        default:
+          if (approvalStatus === "pending") {
+            router.replace("/(root_screen)/status/pending");
+          } else if (approvalStatus === "rejected") {
+            router.replace("/(root_screen)/status/rejected");
+          } else {
+            router.replace("/(root_screen)/registration/step1");
+          }
+      }
+    } else if (approvalStatus === "pending") {
+      router.replace("/(root_screen)/status/pending");
+    } else if (approvalStatus === "rejected") {
+      router.replace("/(root_screen)/status/rejected");
+    }
+  }, [isLoggedIn, hasHydrated, fontsLoaded]);
+
+  useEffect(() => {
+    if (fontsLoaded && hasHydrated) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, hasHydrated]);
 
-  if (!fontsLoaded) {
-    return null;
+  // 👇 Show nothing until both fonts and persistence are ready
+  if (!fontsLoaded || !hasHydrated) {
+    return null; // Splash screen stays visible
   }
 
   return (

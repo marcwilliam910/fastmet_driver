@@ -91,8 +91,8 @@ const HeaderTabs = () => {
         subscriptionRef.current = await Location.watchPositionAsync(
           {
             accuracy: Location.Accuracy.Balanced,
-            timeInterval: 30_000,
-            distanceInterval: 800,
+            timeInterval: 20_000,
+            distanceInterval: 300,
           },
           (location) => {
             const newLocation = {

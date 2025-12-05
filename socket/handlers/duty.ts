@@ -34,3 +34,14 @@ export const updateLocation = (
 ) => {
   socket.emit("updateLocation", location);
 };
+
+export const availabilityChanged = (socket: Socket) => {
+  const availabilityChangedHandler = (data: { pendingBookings: Booking[] }) => {
+    console.log(data.pendingBookings);
+    useAppStore.getState().setIncomingBooking(data.pendingBookings);
+  };
+  socket.on("availabilityChanged", availabilityChangedHandler);
+  return () => {
+    socket.off("availabilityChanged", availabilityChangedHandler);
+  };
+};

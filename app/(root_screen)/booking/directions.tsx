@@ -1,5 +1,6 @@
 import MapButtonsWrapper from "@/components/MapButtons";
 import MapScreen from "@/components/maps/MapScreen";
+import BookingCompleteModal from "@/components/modals/bookingComplete";
 import ExitMapModal from "@/components/modals/exitMapModal";
 import SeeMoreModal from "@/components/modals/seeMoreModal";
 import { useAppStore } from "@/store/useAppStore";
@@ -12,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Directions() {
   const [showExitModal, setShowExitModal] = useState(false);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
 
   const [isSeeMoreModalVisible, setIsSeeMoreModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
@@ -19,7 +21,7 @@ export default function Directions() {
   const activeBooking = useAppStore((s) => s.activeBooking);
 
   // 1. Prevent screen removal (for both platforms)
-  usePreventRemove(!showExitModal, () => {
+  usePreventRemove(!showExitModal && showCompleteModal, () => {
     setShowExitModal(true);
   });
 
@@ -53,7 +55,7 @@ export default function Directions() {
           bottom: 0,
         }}
       >
-        <MapButtonsWrapper />
+        <MapButtonsWrapper showCompleteModal={setShowCompleteModal} />
 
         <View
           className="flex-row justify-evenly items-center px-5 py-3 w-full bg-white z-30 rounded-t-3xl "
@@ -86,7 +88,6 @@ export default function Directions() {
           visible={isSeeMoreModalVisible}
           onClose={() => setIsSeeMoreModalVisible(false)}
           data={activeBooking}
-          onPress={() => {}}
           isAccepted={true}
         />
       )}
@@ -98,6 +99,11 @@ export default function Directions() {
           useAppStore.getState().setIsDriving(false);
           router.replace("/(drawer)/(tabs)/booking");
         }}
+      />
+
+      <BookingCompleteModal
+        visible={showCompleteModal}
+        setVisible={setShowCompleteModal}
       />
     </View>
   );

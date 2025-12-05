@@ -1,18 +1,26 @@
+import { useSocket } from "@/socket/context/SocketProvider";
+import { bookingComplete } from "@/socket/handlers/booking";
 import { useAppStore } from "@/store/useAppStore";
 import { MAX_LOCATION_RADIUS_KM } from "@/utils/constants";
 import { calculateDistance } from "@/utils/distanceCalculator";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Pressable, View } from "react-native";
+import Toast from "react-native-toast-message";
 import SwipeButton from "rn-swipe-button";
 
-export default function MapButtonsWrapper() {
+export default function MapButtonsWrapper({
+  showCompleteModal,
+}: {
+  showCompleteModal: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const driverLocation = useAppStore((s) => s.driverLocation);
   const activeBooking = useAppStore((s) => s.activeBooking);
   const isDriving = useAppStore((s) => s.isDriving);
   const setIsDriving = useAppStore((s) => s.setIsDriving);
   const setNavigationStage = useAppStore((s) => s.setNavigationStage);
   const navigationStage = useAppStore((s) => s.navigationStage);
+  const socket = useSocket();
 
   if (!isDriving) return null; // Do not show button unless in drive mode
   if (!driverLocation || !activeBooking) return null;
@@ -32,7 +40,6 @@ export default function MapButtonsWrapper() {
     { lat: driverLocation.lat, lng: driverLocation.lng },
     location
   );
-
   const isInRadius = distance <= MAX_LOCATION_RADIUS_KM;
 
   return (
@@ -40,9 +47,31 @@ export default function MapButtonsWrapper() {
       {isInRadius ? (
         <SwipeArriveButton
           stage={navigationStage}
-          onSwipe={() => {
+          onSwipe={async () => {
+            const isPickup = navigationStage === "TO_PICKUP";
+            const title = isPickup ? "Arrived at Pick Up" : "Booking Completed";
+            const subtitle = isPickup
+              ? "You have arrived at your destination"
+              : "You have successfully completed the booking";
+
+            Toast.show({
+              type: "success",
+              text1: title,
+              text2: subtitle,
+              position: "bottom",
+              visibilityTime: 7000,
+              swipeable: true,
+              bottomOffset: 130,
+            });
+
             setIsDriving(false);
-            setNavigationStage("TO_DROPOFF");
+
+            if (isPickup) {
+              setNavigationStage("TO_DROPOFF");
+            } else {
+              showCompleteModal(true);
+              bookingComplete(socket, activeBooking._id);
+            }
           }}
         />
       ) : (

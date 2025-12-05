@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { createSecureStorage } from "./secureStorage";
 import {
   ActiveBookingSlice,
   createActiveBookingSlice,
@@ -22,43 +24,52 @@ export type AppStore = RequestBookingSlice &
   DriverLocationSlice &
   AuthSlice;
 
-// export const useAppStore = create<AppStore>()(
-//   persist(
-//     (...a) => ({
-//       ...createRequestBookingSlice(...a),
-//       ...createDutySlice(...a),
-//       ...createActiveBookingSlice(...a),
-//       ...createLoadingSlice(...a),
-//       ...createDriverLocationSlice(...a),
-//       ...createAuthSlice(...a),
-//     }),
-//     {
-//       name: "fastmet-driver-storage",
-//       storage: createSecureStorage<AppStore>(),
-//       // Only persist auth data (prevents persisting temporary data)
-//       // @ts-ignore - partialize is valid but type might be strict
+export const useAppStore = create<AppStore>()(
+  persist(
+    (...a) => ({
+      ...createRequestBookingSlice(...a),
+      ...createDutySlice(...a),
+      ...createActiveBookingSlice(...a),
+      ...createLoadingSlice(...a),
+      ...createDriverLocationSlice(...a),
+      ...createAuthSlice(...a),
+    }),
+    {
+      name: "fastmet-driver-storage",
+      storage: createSecureStorage<{
+        phoneNumber: string;
+        token: string | null;
+        id: string | null;
+        registrationStep: number | null;
+        approvalStatus: string | null;
+        name: string | null;
+        email: string | null;
+        vehicle: string | null;
+        license: string | null;
+      }>(),
 
-//       partialize: (state) => ({
-//         phoneNumber: state.phoneNumber,
-//         token: state.token,
-//         id: state.id,
-//         isProfileComplete: state.isProfileComplete,
-//         approvalStatus: state.approvalStatus,
-//         name: state.name,
-//         email: state.email,
-//         vehicle: state.vehicle,
-//       }),
-//     }
-//   )
-// );
+      partialize: (state) => ({
+        phoneNumber: state.phoneNumber,
+        token: state.token ?? null,
+        id: state.id ?? null,
+        registrationStep: state.registrationStep ?? null,
+        approvalStatus: state.approvalStatus ?? null,
+        name: state.name ?? null,
+        email: state.email ?? null,
+        vehicle: state.vehicle ?? null,
+        license: state.license ?? null,
+      }),
+    }
+  )
+);
 
-export const useAppStore = create<AppStore>()((...a) => ({
-  ...createRequestBookingSlice(...a),
-  ...createDutySlice(...a),
-  ...createActiveBookingSlice(...a),
-  ...createLoadingSlice(...a),
-  ...createDriverLocationSlice(...a),
-  ...createAuthSlice(...a),
-}));
+// export const useAppStore = create<AppStore>()((...a) => ({
+//   ...createRequestBookingSlice(...a),
+//   ...createDutySlice(...a),
+//   ...createActiveBookingSlice(...a),
+//   ...createLoadingSlice(...a),
+//   ...createDriverLocationSlice(...a),
+//   ...createAuthSlice(...a),
+// }));
 
 // No persist middleware - state resets on app restart

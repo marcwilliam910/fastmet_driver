@@ -1,7 +1,6 @@
 import CustomKeyAvoidingView from "@/components/CustomKeyAvoid";
-import useImage from "@/hooks/useImage";
 import { useAppStore } from "@/store/useAppStore";
-import { uploadAllImages } from "@/utils/imagePicker";
+import { pickImage, uploadAllImages } from "@/utils/imagePicker";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -16,7 +15,6 @@ const Step4 = () => {
   const [chassisUri, setChassisUri] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const setLoading = useAppStore((s) => s.setLoading);
-  const { pickImage } = useImage();
 
   const handleNext = async () => {
     // 1. Build validation object

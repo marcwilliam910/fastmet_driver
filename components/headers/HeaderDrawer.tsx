@@ -20,7 +20,7 @@ const HeaderDrawer = ({ title }: { title: string }) => {
     <View className="flex-row items-center justify-center">
       {/* Left: Hamburger Menu */}
       <Pressable
-        className="absolute top-0 left-0"
+        className="absolute -top-2 left-0"
         onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
         hitSlop={{ top: 20, left: 20, bottom: 20, right: 20 }}
       >

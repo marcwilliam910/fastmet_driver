@@ -9,7 +9,7 @@ import {
   receiveBookingRequest,
   sendDriverLocation,
 } from "../handlers/booking";
-import { dutyStatusChanged } from "../handlers/duty";
+import { availabilityChanged, dutyStatusChanged } from "../handlers/duty";
 import { getSocket } from "../socket";
 
 interface SocketContextValue {
@@ -43,7 +43,8 @@ export default function SocketProvider({
       socket.disconnect();
       cleanupDutyStatus();
     };
-  }, [socket, token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   // Add booking listener based on onDuty
   useEffect(() => {
@@ -53,12 +54,14 @@ export default function SocketProvider({
     const cleanupPendingBookings = pendingBookingsUpdated(socket);
     const cleanupBookingTaken = bookingTaken(socket);
     const cleanupSendDriverLocation = sendDriverLocation(socket);
+    const cleanupAvailabilityChanged = availabilityChanged(socket);
 
     return () => {
       cleanupReceiveBooking();
       cleanupPendingBookings();
       cleanupBookingTaken();
       cleanupSendDriverLocation();
+      cleanupAvailabilityChanged();
     };
   }, [onDuty, socket]);
 
@@ -72,5 +75,7 @@ export default function SocketProvider({
 export const useSocket = () => {
   const context = useContext(SocketContext);
   if (!context) throw new Error("useSocket must be used within SocketProvider");
+  if (!context.socket) throw new Error("Socket is not connected");
+
   return context.socket;
 };

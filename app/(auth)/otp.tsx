@@ -1,3 +1,4 @@
+import CustomKeyAvoidingView from "@/components/CustomKeyAvoid";
 import api from "@/lib/axios";
 import { useAppStore } from "@/store/useAppStore";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,6 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PhoneOTPScreen() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -130,116 +132,120 @@ export default function PhoneOTPScreen() {
   };
 
   return (
-    <View className="flex-1 items-center justify-center bg-white px-6">
-      {/* Title */}
-      <Text className="text-3xl font-extrabold text-[#111] mb-3">
-        Verify Your Number
-      </Text>
+    <SafeAreaView className="flex-1 bg-white">
+      <CustomKeyAvoidingView>
+        <View className="flex-1 items-center justify-center px-6">
+          {/* Title */}
+          <Text className="text-3xl font-extrabold text-[#111] mb-3">
+            Verify Your Number
+          </Text>
 
-      {/* Subtitle */}
-      <Text className="text-base text-gray-500 mb-10 text-center leading-6">
-        Enter the 6-digit verification code sent to{" "}
-        <Text className="font-semibold text-[#111] underline">
-          0{useAppStore.getState().phoneNumber}
-        </Text>
-      </Text>
+          {/* Subtitle */}
+          <Text className="text-base text-gray-500 mb-10 text-center leading-6">
+            Enter the 6-digit verification code sent to{" "}
+            <Text className="font-semibold text-[#111] underline">
+              0{useAppStore.getState().phoneNumber}
+            </Text>
+          </Text>
 
-      {/* OTP Inputs */}
-      <View className="flex-row justify-between w-full mb-4">
-        {otp.map((digit, index) => (
-          <TextInput
-            key={index}
-            ref={(ref: TextInput | null) => {
-              inputRefs.current[index] = ref;
-            }}
-            className={`w-14 h-16 rounded-2xl text-center text-2xl font-bold
+          {/* OTP Inputs */}
+          <View className="flex-row justify-between w-full mb-4">
+            {otp.map((digit, index) => (
+              <TextInput
+                key={index}
+                ref={(ref: TextInput | null) => {
+                  inputRefs.current[index] = ref;
+                }}
+                className={`w-14 h-16 rounded-2xl text-center text-2xl font-bold
                 ${digit ? "bg-orange-100 border border-darkPrimary" : "bg-white border border-gray-300"}
                 ${error ? "border-red-500" : ""}
               `}
-            value={digit}
-            onChangeText={(value) => handleOtpChange(value, index)}
-            onKeyPress={(e) => handleKeyPress(e, index)}
-            keyboardType="number-pad"
-            maxLength={1}
-            selectTextOnFocus
-            editable={!loading}
-            autoFocus={index === 0}
-          />
-        ))}
-      </View>
+                value={digit}
+                onChangeText={(value) => handleOtpChange(value, index)}
+                onKeyPress={(e) => handleKeyPress(e, index)}
+                keyboardType="number-pad"
+                maxLength={1}
+                selectTextOnFocus
+                editable={!loading}
+                autoFocus={index === 0}
+              />
+            ))}
+          </View>
 
-      {/* Error */}
-      {error && (
-        <View
-          className="flex-row items-center justify-center w-full mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-xl"
-          style={{
-            shadowColor: "#000",
-            shadowOpacity: 0.05,
-            shadowRadius: 4,
-            shadowOffset: { width: 0, height: 2 },
-            elevation: 2, // Android
-          }}
-        >
-          <Ionicons name="alert-circle" size={20} color="#DC2626" />
+          {/* Error */}
+          {error && (
+            <View
+              className="flex-row items-center justify-center w-full mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-xl"
+              style={{
+                shadowColor: "#000",
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                shadowOffset: { width: 0, height: 2 },
+                elevation: 2, // Android
+              }}
+            >
+              <Ionicons name="alert-circle" size={20} color="#DC2626" />
 
-          <Text
-            className="text-red-700 text-sm ml-3  leading-5
+              <Text
+                className="text-red-700 text-sm ml-3  leading-5
       "
-          >
-            {error}
-          </Text>
-        </View>
-      )}
+              >
+                {error}
+              </Text>
+            </View>
+          )}
 
-      {/* Resend */}
-      <View className="items-center mb-10">
-        <Text className="text-sm text-gray-600 mb-1">
-          Didn’t receive the code?
-        </Text>
-
-        {canResend ? (
-          <Pressable disabled={loading}>
-            <Text className="text-base font-semibold text-darkPrimary">
-              Resend Code
+          {/* Resend */}
+          <View className="items-center mb-10">
+            <Text className="text-sm text-gray-600 mb-1">
+              Didn’t receive the code?
             </Text>
-          </Pressable>
-        ) : (
-          <Text className="text-base font-semibold text-gray-400">
-            Resend in {Math.floor(resendTimer / 60)}:
-            {(resendTimer % 60).toString().padStart(2, "0")}
-          </Text>
-        )}
-      </View>
 
-      {/* Verify Button */}
-      <Pressable
-        onPress={handleVerifyOTP}
-        className={`rounded-xl py-4 items-center w-full mb-4 
+            {canResend ? (
+              <Pressable disabled={loading}>
+                <Text className="text-base font-semibold text-darkPrimary">
+                  Resend Code
+                </Text>
+              </Pressable>
+            ) : (
+              <Text className="text-base font-semibold text-gray-400">
+                Resend in {Math.floor(resendTimer / 60)}:
+                {(resendTimer % 60).toString().padStart(2, "0")}
+              </Text>
+            )}
+          </View>
+
+          {/* Verify Button */}
+          <Pressable
+            onPress={handleVerifyOTP}
+            className={`rounded-xl py-4 items-center w-full mb-4 
             ${
               loading || otp.join("").length !== 6
                 ? "bg-lightPrimary/50"
                 : "bg-lightPrimary"
             }
           `}
-        disabled={loading || otp.join("").length !== 6}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text className="text-white text-base font-semibold">Verify</Text>
-        )}
-      </Pressable>
+            disabled={loading || otp.join("").length !== 6}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text className="text-white text-base font-semibold">Verify</Text>
+            )}
+          </Pressable>
 
-      {/* Change Number */}
-      <Pressable
-        onPress={() => router.back()}
-        disabled={loading}
-        className="items-center"
-      >
-        <Text className="text-sm font-medium text-gray-600">
-          Wrong number? Change it
-        </Text>
-      </Pressable>
-    </View>
+          {/* Change Number */}
+          <Pressable
+            onPress={() => router.back()}
+            disabled={loading}
+            className="items-center"
+          >
+            <Text className="text-sm font-medium text-gray-600">
+              Wrong number? Change it
+            </Text>
+          </Pressable>
+        </View>
+      </CustomKeyAvoidingView>
+    </SafeAreaView>
   );
 }

@@ -1,24 +1,21 @@
-import { useActiveBookings } from "@/queries/bookingQueries";
+import { useAuth } from "@/hooks/useAuth";
+import { useActiveBooking } from "@/queries/bookingQueries";
 import { useAppStore } from "@/store/useAppStore";
 import { formatDate } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 export default function Active() {
+  const { id } = useAuth();
+
   const {
-    data: activeBookings,
+    data: activeBooking,
     isPending,
     error,
     refetch,
-  } = useActiveBookings("123");
+  } = useActiveBooking(id!);
 
   if (isPending)
     return (
@@ -37,7 +34,7 @@ export default function Active() {
 
   return (
     <>
-      {activeBookings.length === 0 ? (
+      {!activeBooking ? (
         <View className="bg-white flex-1 px-8 py-12">
           <View className="items-center">
             <Ionicons
@@ -57,33 +54,18 @@ export default function Active() {
           </View>
         </View>
       ) : (
-        <View className="flex-1 bg-white">
-          <FlatList
-            data={activeBookings}
-            renderItem={({ item }) => (
-              <Card
-                pickup={item.pickUp.address}
-                dropoff={item.dropOff.address}
-                distance={item.routeData.distance}
-                amount={item.routeData.price}
-                isCash={item.paymentMethod === "cash"}
-                bookingType={item.bookingType}
-                onPress={() => {
-                  useAppStore.getState().setActiveBooking(item);
-                  router.push("/(root_screen)/booking/pickup");
-                }}
-              />
-            )}
-            keyExtractor={(item) => item._id}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{
-              paddingBottom: 40,
-              gap: 15,
-              paddingHorizontal: 20,
-              paddingTop: 10,
+        <View className="flex-1 bg-white p-6 ">
+          <Card
+            pickup={activeBooking.pickUp.address}
+            dropoff={activeBooking.dropOff.address}
+            distance={activeBooking.routeData.distance}
+            amount={activeBooking.routeData.price}
+            isCash={activeBooking.paymentMethod === "cash"}
+            bookingType={activeBooking.bookingType}
+            onPress={() => {
+              useAppStore.getState().setActiveBooking(activeBooking);
+              router.push("/(root_screen)/booking/directions");
             }}
-            refreshing={isPending}
-            onRefresh={refetch}
           />
         </View>
       )}
@@ -126,7 +108,7 @@ const Card = ({
     >
       <Pressable
         onPress={onPress}
-        className="overflow-hidden bg-white rounded-2xl active:opacity-80"
+        className="overflow-hidden bg-white rounded-2xl active:bg-gray-100"
       >
         {/* Header */}
         <View className="flex-row items-center justify-between px-5 py-3 bg-lightPrimary">

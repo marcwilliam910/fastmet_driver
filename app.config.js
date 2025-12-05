@@ -78,6 +78,7 @@ export default {
           RNMapboxMapsImpl: "mapbox",
         },
       ],
+      "expo-font",
       "expo-web-browser",
       "expo-secure-store",
     ],
@@ -89,10 +90,6 @@ export default {
       eas: {
         projectId: "3090586e-850e-4f59-9d05-0d3e3dffa7a9",
       },
-      apiUrl:
-        process.env.NODE_ENV === "production"
-          ? process.env.EXPO_PUBLIC_API_URL_PROD
-          : process.env.EXPO_PUBLIC_API_URL_DEV,
     },
   },
 };

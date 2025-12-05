@@ -1,10 +1,7 @@
 import { useAppStore } from "@/store/useAppStore";
 import axios, { InternalAxiosRequestConfig } from "axios";
 
-// const apiUrl = "http://192.168.100.12:3000/api";
-export const apiUrl = "http://192.168.100.125:3000/api/driver";
-// when i rebuild the app, change the apiUrl to the following line
-// const apiUrl = Constants.expoConfig?.extra?.apiUrl ?? "http://192.168.100.125:3000/api";
+export const apiUrl = `${process.env.EXPO_PUBLIC_BASE_URL}/api/driver`;
 
 const api = axios.create({
   baseURL: apiUrl,

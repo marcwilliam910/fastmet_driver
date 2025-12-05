@@ -41,8 +41,8 @@ export default function Regular() {
     const payload = {
       bookingId: selectedRequest._id,
       driverData: {
-        id: "123",
-        name: "Test Driver",
+        id: useAppStore.getState().id!,
+        name: useAppStore.getState().name!,
         rating: 4.5,
       },
     };

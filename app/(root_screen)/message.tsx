@@ -1,4 +1,4 @@
-import { openGallery, takePhotoAndAddText } from "@/utils/imagePicker";
+import { openGallery } from "@/utils/imagePicker";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -80,23 +80,23 @@ const Message = () => {
     }
   };
 
-  const addImage = async () => {
-    const editedPhotoUri = await takePhotoAndAddText();
-    // Check if the photo was successfully captured and edited
-    if (!editedPhotoUri) {
-      return; // Exit if user canceled or something went wrong
-    }
+  // const addImage = async () => {
+  //   const editedPhotoUri = await takePhotoAndAddText();
+  //   // Check if the photo was successfully captured and edited
+  //   if (!editedPhotoUri) {
+  //     return; // Exit if user canceled or something went wrong
+  //   }
 
-    // Send message with the new image
-    const newMessage: IMessage = {
-      _id: Math.random().toString(),
-      text: "",
-      createdAt: new Date(),
-      user: { _id: 1, name: "Me" },
-      image: editedPhotoUri,
-    };
-    onSend([newMessage]);
-  };
+  //   // Send message with the new image
+  //   const newMessage: IMessage = {
+  //     _id: Math.random().toString(),
+  //     text: "",
+  //     createdAt: new Date(),
+  //     user: { _id: 1, name: "Me" },
+  //     image: editedPhotoUri,
+  //   };
+  //   onSend([newMessage]);
+  // };
 
   const renderInputToolbar = () => {
     return (
@@ -104,7 +104,7 @@ const Message = () => {
         <View className="flex-row items-end gap-3">
           <View className="flex-row items-center gap-3 h-11">
             {/* Camera */}
-            <Pressable onPress={addImage}>
+            <Pressable>
               <Ionicons name="camera" size={28} color="#FFA840" />
             </Pressable>
             {/* Gallery */}

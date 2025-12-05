@@ -9,6 +9,7 @@ export const STATIC_IMAGES = {
   pickup: require("@/assets/images/pickup.png"),
   dropoff: require("@/assets/images/dropoff.png"),
   currentLoc: require("@/assets/images/gps.png"),
+  bookingComplete: require("@/assets/images/booking_complete.png"),
 };
 
 export const MAPBOX_PUBLIC_KEY =

@@ -103,3 +103,7 @@ export const sendDriverLocation = (socket: Socket) => {
 
   return () => socket.off("requestDriverLocation", handleLocationRequest);
 };
+
+export const bookingComplete = (socket: Socket, bookingId: string) => {
+  socket.emit("setAvailability", { isAvailable: true, bookingId });
+};

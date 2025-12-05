@@ -1,5 +1,5 @@
-import { fetchActiveBookings } from "@/api/book";
-import { useQuery } from "@tanstack/react-query";
+import { fetchActiveBooking, getDriverCompletedBookings } from "@/api/book";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 // TODO: DELETE
 // export const useRequestBookings = () => {
@@ -33,9 +33,19 @@ import { useQuery } from "@tanstack/react-query";
 //   }, [query.error]);
 // };
 
-export const useActiveBookings = (driverId: string) => {
+export const useActiveBooking = (driverId: string) => {
   return useQuery({
-    queryKey: ["activeBookings"],
-    queryFn: () => fetchActiveBookings(driverId),
+    queryKey: ["activeBooking"],
+    queryFn: () => fetchActiveBooking(driverId),
+  });
+};
+
+export const useDriverCompletedBookings = (driverId: string, limit: number) => {
+  return useInfiniteQuery({
+    queryKey: ["completedBookings", driverId],
+    queryFn: ({ pageParam = 1 }) =>
+      getDriverCompletedBookings(driverId, pageParam, limit),
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 1,
   });
 };

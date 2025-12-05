@@ -1,6 +1,5 @@
-import useImage from "@/hooks/useImage";
 import { useAppStore } from "@/store/useAppStore";
-import { uploadAllImages } from "@/utils/imagePicker";
+import { pickImage, uploadAllImages } from "@/utils/imagePicker";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -16,8 +15,6 @@ const Step2 = () => {
   >(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const setLoading = useAppStore((s) => s.setLoading);
-
-  const { pickImage } = useImage();
 
   const handleNext = async () => {
     // 1. Build validation object
